@@ -1,0 +1,8 @@
+[创建虚拟环境的时候就已经有的库]
+
+appdirs ==1.4.3
+packaging == 16.8
+pkg-resources  == 0.0.0
+pyparsing == 2.2.0
+siz == 1.10.0
+
