@@ -1,25 +1,30 @@
-from flask import Flask, render_template, request, make_response
-import time
-import hashlib
+from flask import Flask, g, request, make_response
+import time, hashlib
 import xml.etree.ElementTree as ET
+
 app = Flask(__name__)
 
-@app.route('/', methods=["GET", "POST"])
-def wechat_auth():
-    if request.method == 'GET':
-        if len(request.args)>3:
-            token = 'kepler'
-            query = request.args
-            signature = query['signature']
-            timestamp = query['timestamp']
-            nonce = query['nonce']
-            echostr = query['echostr']
-            s= [timestamp, nonce, token]
-            s.sort()
-            sha1str = hashlib.sha1(s).hexdigest()
-            if sha1str == signature:
-                return make_response(echostr)
-            else:
-                return make_response("认证失败")
-        else:
-            return "认证失败"
+def verification(request):
+    signature = request.args.get('signature')
+    timestamp = request.args.get('timestamp')
+    nonce = request.args.get('nonce')
+    token = 'kepler'
+
+    tmplist = [token, timestamp, nonce]
+    tmplist.sort()
+    tmpstr = ''.join(tmplist)
+    tmp = tmpstr.encode('utf-8')
+
+    hashstr = hashlib.sha1(tmp).hexdigest()
+
+    if hashstr == signature:
+        return True
+    return False
+
+@app.route('/wechat', methods=['GET'])
+def wechat_access_verify():
+    echostr = request.args.get('echostr')
+    if verification(request) and echostr is not None:
+        return echostr
+    return 'access verification fail'
+
