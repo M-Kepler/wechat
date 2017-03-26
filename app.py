@@ -1,30 +1,34 @@
-from flask import Flask, g, request, make_response
-import time, hashlib
+from flask import Flask, g, request, make_response, render_template, abort
+import time, hashlib, urllib, re, time, json
 import xml.etree.ElementTree as ET
-
+from wechatpy import parse_message, create_reply
+from wechatpy.replies import ImageReply
+from wechatpy.utils import check_signature
+from wechatpy.exceptions import InvalidSignatureException
 app = Flask(__name__)
 
-def verification(request):
-    signature = request.args.get('signature')
-    timestamp = request.args.get('timestamp')
-    nonce = request.args.get('nonce')
-    token = 'kepler'
+@app.route('/wechat', methods=['GET', 'POST'])
+def wechat():
+    signature = request.args.get('signature', '')
+    timestamp = request.args.get('timestamp', '')
+    nonce = request.args.get('nonce', '')
+    echo_str = request.args.get('echostr', '')
+    token='kepler'
+    try:
+        check_signature(token, signature, timestamp, nonce)
+    except InvalidSignatureException:
+        abort(403)
+    if request.method == 'GET':
+        return echo_str
+    else:
+        msg = parse_message(request.data)
+        if msg.type == 'text':
+            reply = create_reply(msg.content, msg)
+        else:
+            reply = create_reply('Sorry, can not handle this for now', msg)
+        return reply.render()
 
-    tmplist = [token, timestamp, nonce]
-    tmplist.sort()
-    tmpstr = ''.join(tmplist)
-    tmp = tmpstr.encode('utf-8')
-
-    hashstr = hashlib.sha1(tmp).hexdigest()
-
-    if hashstr == signature:
-        return True
-    return False
-
-@app.route('/wechat', methods=['GET'])
-def wechat_access_verify():
-    echostr = request.args.get('echostr')
-    if verification(request) and echostr is not None:
-        return echostr
-    return 'access verification fail'
-
+@app.route('/')
+@app.route('/index')
+def index():
+    return 'Hi There'
