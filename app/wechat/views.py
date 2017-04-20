@@ -1,0 +1,120 @@
+# !/usr/bin env python
+# coding:utf-8
+
+from flask import flash, session, request, render_template, url_for,\
+        redirect, abort, current_app, g, jsonify, Markup
+from . import wechat
+from .utils import check_wechat_signature
+from .response import handle_wechat_response
+from .func_plugins import score
+from .models import is_user_exists
+
+
+@wechat.route('/test')
+def test():
+    return 'Hi There'
+
+
+@wechat.route('/', methods=['GET', 'POST'])
+@check_wechat_signature
+def handle_wechat_request():
+    """
+    处理微信回复请求
+    """
+    if request.method == 'GET' :
+        #  接入认证
+        return request.args.get('echostr', '')
+    else:
+        return handle_wechat_response(request.data)
+
+
+@wechat.route('/auth-score/<openid>', methods=['GET', 'POST'])
+def auth_score(openid=None):
+    """
+    进入绑定页面,绑定教务系统
+    """
+    if request.method == 'POST':
+        studentid = request.form.get('studentid', '')
+        studentpwd = request.form.get('studentpwd', '')
+        #  进行模拟登录
+        if studentid and studentpwd and is_user_exists(openid):
+           score.get_info.delay(openid, studentid, studentpwd, check_login=True)
+           errormsg = 'ok'
+        else:
+            errormsg = '学号或密码输入错误'
+        return jsonify({'errormsg':errormsg})
+    elif is_user_exists(openid):
+        jsapi = get_jsapi_signature_data(request.url)
+        jsapi['jsApiList'] = ['hideAllNonBaseMenuItem']
+        return render_template('wechat/auth.html',
+                title = '微信',
+                desc = "请绑定教务系统",
+                username_label = '学号',
+                username_label_placeholder = '请输入学号',
+                password_label_placeholder = '教务系统密码',
+                jsapi = Markup(jsapi)
+                )
+    else:
+        abort(404)
+
+
+@wechat.route('/auth-score/<openid>/result', methods=['GET', 'POST'])
+def auth_score_result(openid=None):
+    """
+    查询学号绑定结果
+    """
+    if is_user_exists(openid):
+        redis_prefix = 'wechat:user:auth:score:'
+        errormsg = redis.get(redis_prefix + openid)
+        if errormsg:
+            redis.delete(redis_prefix + openid)
+            return jsonify({'errormsg':errormsg})
+        else:
+            abort(404)
+    else:
+        abort(404)
+
+
+#  XXX 图书馆这个先不做了吧
+@wechat.route('/auth-library/<openid>', methods=['GET', 'POST'])
+def auth_library(openid=None):
+    """
+    绑定图书馆帐号
+    """
+    if request.method == 'POST':
+        libraryid = request.form.get('libraryid', '')
+        librarypwd = request.form.get('librarypwd', '')
+        if libraryid and librarypwd and is_user_exists(openid):
+            errormsg = 'ok'
+            pass
+        else:
+            errormsg = '卡号或密码不正确'
+
+
+@wechat.route('/auth-library/<openid>/result', methods=['GET'])
+def auth_library_result(openid=None):
+    """查询借书卡绑定结果"""
+    if is_user_exists(openid):
+        redis_prefix = 'wechat:user:auth:library:'
+        errmsg = redis.get(redis_prefix + openid)
+        if errormsg:
+            redis.delete(redis_prefix + openid)
+            return jsonify({'errormsg': errormsg})
+        else:
+            abort(404)
+    else:
+        abort(404)
+
+
+
+@wechat.errorhandler(404)
+def page_not_found(error):
+    return "page not found!", 404
+
+
+@wechat.errorhandler(Exception)
+def unhandled_exception(error):
+    current_app.logger.error('Unhandled Exception:%s', (error))
+    return "Error", 500
+
+
