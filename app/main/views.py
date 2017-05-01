@@ -295,9 +295,12 @@ def edit_profile_admin(id):
 @main.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html', code=404, e=e), 404
+
+
 @main.errorhandler(500)
 def internal_server_error(e):
     return render_template('error.html', code=500, e=e), 500
+
 
 '''
 #  上传文件

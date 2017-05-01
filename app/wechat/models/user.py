@@ -1,9 +1,5 @@
 # !/usr/bin/env python
 # _*_ coding:utf-8
-"""
-    用户个人信息
-    #  TODO
-"""
 
 
 from app import db
@@ -26,11 +22,11 @@ class WechatUser(db.Model):
     regtime = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     # TODO 我要对用户进行分组, 好像微信提供了分组的接口, 所以我还用写role表吗?
-    role_id = db.Column(db.Integer)
-    phone_number = db.Column(db.String(32), nullable=True)
-    eamil = db.Column(db.String(32), nullable=True)
+    #  role_id = db.Column(db.Integer)
+    #  phone_number = db.Column(db.String(32), nullable=True)
+    #  eamil = db.Column(db.String(32), nullable=True)
 
-    def __init(self, openid, nick_name=None, real_name=None,
+    def __init__(self, openid, nickname=None, realname=None,
             classname = None, sex = None, province = None, city = None,
             country = None, headimgurl = None, regtime = None):
         self.openid = openid

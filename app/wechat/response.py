@@ -1,37 +1,45 @@
 # coding:utf-8
 
+#  [对点击菜单/文字等] 的回复处理都放在这里.
+#  而回复的具体功能实现放在func_plugins里
+
+
 import re
 from wechatpy import parse_message, create_reply, events
+from wechatpy import WeChatClient
 from flask import current_app as app
+from .func_plugins import wechat_custom, music
+from .models import set_user_info, get_user_student_info
+from .func_plugins.state import get_user_last_interact_time, set_user_last_interact_time
 
 
 def handle_wechat_response(data):
-    """
-    回复微信的POST请求
-    """
-    global msg, openid
+    """ 回复微信的POST请求 """
+    global msg, openid, wechat_client
+    wechat_client = WeChatClient(app.config['APPID'],app.config['APPSECRET'])
     msg = parse_message(data)
     openid = msg.source
+    #  将用户信息写入数据库
+    set_user_info(openid)
     try:
-        #  根据消息类型选择回复方法
-        #  TODO: 理解这个用法
-        get_response_func = msg_type_resp[msg.type]
-        response = get_response_func()
+        #  根据消息类型(key值)选择回复方法
+        #  XXX  理解这个用法, 下面(第84行)还有(在wechatpy/replies.py源码里也可以看到)
+        response = msg_type_resp[msg.type]()
     except KeyError:
         #  默认回复消息
         response = 'success'
+        set_user_last_interact_time(openid, msg.time)
+
     return response
 
 
-#  存储微信的消息类型/事件的字典
+#  存储微信的消息类型 or 事件的字典
 msg_type_resp = {}
 msg_event_resp = {}
 
 
 def set_msg_type(msg_type):
-    """
-    根据微信消息类型对应函数
-    """
+    """ 根据消息类型对应函数的装饰器 """
     def decorator(func):
         msg_type_resp[msg_type] = func
         return func
@@ -39,9 +47,7 @@ def set_msg_type(msg_type):
 
 
 def set_msg_event(msg_event):
-    """
-    根据微信消息类型对应函数
-    """
+    """ 根据消息事件对应函数的装饰器 """
     def decorator(func):
         msg_event_resp[msg_event] = func
         return func
@@ -50,10 +56,7 @@ def set_msg_event(msg_event):
 
 @set_msg_type('event')
 def response_event():
-    """
-    订阅回复
-    """
-    #  set_user_state(openid, 'default')
+    """ 订阅回复 """
     try:
         get_event_respon_func = msg_event_resp[msg.event]
         event_response = get_event_respon_func()
@@ -65,55 +68,38 @@ def response_event():
 
 @set_msg_type('text')
 def response_text():
+    """ 回复文本类型消息
+    根据用户发的文字调用特定的功能
     """
-    回复文本类型消息
-    """
-    #  response = create_reply(msg.content, msg)
-    #  这样就可以根据用户发的文字调用特定的功能了
     commands= {
         u'^绑定':auth_url,
+        u'^更新菜单':update_menu_setting,
         u'\?|^？|^help|^帮助':all_command
             }
-    state_commands= {
-        'chat':chat_robot
-        }
-
     #  匹配指令
     command_match = False
     for key_word in commands:
         if re.match(key_word, msg.content):
-            #  TODO 设置用户状态是什么意思 #  聊天 \ 快递
-            #  set_user_state(openid, 'default')
             response = commands[key_word]()
             command_match = True
             break
     if not command_match:
-        #  匹配状态
-        #  state = get_user_state(openid)
-        #  state = 'default'
-        #  关键字, 状态都不匹配, 缺省回复
-        #  if state == 'default' or not state:
-            #  response = command_not_found()
-        #  else:
-            #  response = state_commands[state]()
         response = command_not_found()
     return response
 
 
 @set_msg_type('image')
 def response_image():
-    """
-    回复图片消息
-    """
-    pass
+    """ 回复图片消息 """
+    media_id = ''
+    reply = create_reply(media_id, msg)
+    return reply.render()
 
 
 #  XXX 没办法 wechatpy 没有对tpye和event统一, 我只能这样了
 @set_msg_event('subscribe')
 def response_subscribe():
-    """
-    回复订阅事件
-    """
+    """ 回复订阅事件 """
     content = app.config['WELCOME_TEXT'] + app.config['COMMAND_TEXT']
     reply = create_reply(content, msg)
     return reply.render()
@@ -121,31 +107,22 @@ def response_subscribe():
 
 @set_msg_event('click')
 def response_click():
-    """
-    菜单点击事件
-    """
+    """ 回复菜单的点击事件 """
     commands= {
             'music' : play_music,
-            'weather' : weather,
-            'news' :news
+            'school_news' :school_news,
+            'auth':auth_url,
+            'help':all_command,
+            'music':play_music,
+            'score':exam_grade
             }
-    #  set_user_state(openid, 'default')
-    reply = commands[msg.key]()
-    return reply.render()
-
-
-@set_msg_event('subscribe_scan')
-def response_scan():
-    """
-    扫码事件
-    """
-    pass
+    response = commands[msg.key]()
+    return response
 
 
 def auth_url():
-    """
-    教务系统\图书馆绑定
-    """
+    """ 教务系统\图书馆绑定的url """
+    #  组装url
     jw_url = app.config['HOST_URL'] + '/auth-score/' + openid
     library_url = app.config['HOST_URL'] + '/auth-library/' + openid
     content = app.config['AUTH_TEXT'] % (jw_url, library_url)
@@ -154,25 +131,69 @@ def auth_url():
 
 
 def command_not_found():
-    """
-    非关键字指令, 后台留言
+    """ 非关键字回复
+    # TODO 后台转接客服
     """
     content = app.config['COMMAND_NOT_FOUND'] + app.config['HELP_TEXT']
     reply = create_reply(content, msg)
     return reply.render()
 
 
+#  def command_not_found():
+    #  """ 非关键字回复
+    #  """
+    #  # TODO 转接客服接口回复信息
+    #  content = app.config['COMMAND_NOT_FOUND'] + app.config['HELP_TEXT']
+    #  wechat_custom.send_text(openid, content)
+    #  #  转发到微信多客服系统
+    #  return wechat.group_transfer_message()
+
+
 def all_command():
-    """
-    回复全部指令
-    """
+    """ 回复全部指令 """
     content = app.config['COMMAND_TEXT']
     reply = create_reply(content, msg)
     return reply.render()
 
 
-def chat_robot():
+
+def update_menu_setting():
+    """ 更新自定义菜单
+    #  TODO 只要在后台回复'更新菜单'就行了...看来我得加个权限啊
     """
-    聊天机器人接入
+    try:
+        wechat_client.menu.create(app.config['MENU_SETTING'])
+    except Exception as e:
+        return create_reply(e, msg).render()
+    else:
+        return create_reply('Done!', msg).render()
+
+
+def developing():
+    """ 维护公告 """
+    return create_reply('该功能正在维护中...', msg).render()
+
+
+def play_music():
+    """随机播放音乐"""
+    music.get_douban_fm(openid)
+    return 'success'
+    #  return create_reply('这里将随机一首音乐给你', msg).render()
+
+
+def school_news():
+    """学校新闻 """
+    return create_reply('这将是学校新闻的回复', msg).render()
+
+def exam_grade():
+    """查询成绩
     """
-    pass
+    user_student_info = get_user_student_info(openid)
+    if user_student_info:
+        #  TODO 去完善score
+        pass
+    else:
+        url = app.config['HOST_URL'] + '/auth-score/' + openid
+        content = app.config['AUTH_JW_TEXT'] % url
+        reply = create_reply(content, msg)
+        return reply.render()

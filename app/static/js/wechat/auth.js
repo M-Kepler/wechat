@@ -12,7 +12,7 @@ $(function() {
                         wx.closeWindow();
                     }, 3000);
                 } else {
-                    // 绑定失败，显示后端信息
+                    // 绑定失败，显示后端信息(json数据中对象的关键字)
                     $('#err_msg').text(res.errmsg);
                     $('.weui_dialog_alert').show();
                 }

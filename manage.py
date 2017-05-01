@@ -4,6 +4,7 @@ from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand, upgrade
 from app import create_app, db
 from app.models import User, Role, Category, Post, Comment
+from app.wechat.models.user import WechatUser
 from livereload import Server
 from werkzeug.security import generate_password_hash
 
@@ -23,7 +24,8 @@ def dev():
 #  进入shell调试的时候每次都要导入db,models太麻烦了,
 #  所以配置一下shell命令的上下文,就可以在shell里用了,不用每次都导入
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Post=Post,Comment=Comment, Category=Category)
+    return dict(app=app, db=db, User=User, Role=Role, Post=Post,Comment=Comment, Category=Category,
+            WechatUser=WechatUser)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 

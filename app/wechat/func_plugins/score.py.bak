@@ -8,7 +8,6 @@ import requests
 import ast
 import time
 from flask import current_app
-from app import redis
 from bs4 import BeautifulSoup, SoupStrainer
 from ..models import set_user_student_info, set_user_realname_and_classname
 from ..utils import AESCipher
@@ -55,8 +54,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         if not res:
             if check_login:
                 errmsg = u"教务系统连接超时，请稍后重试"
-                #  redis.set(redis_auth_prefix + openid, errmsg, 10)
-                redis.set(redis_auth_prefix + openid, errmsg)
+                redis.set(redis_auth_prefix + openid, errmsg, 10)
             else:
                 content = u"教务系统连接超时\n\n请稍后重试"
                 wechat_custom.send_text(openid, content)
@@ -65,8 +63,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         elif res.status_code == 200 and 'alert' in res.text:
             if check_login:
                 errmsg = u"用户名或密码不正确"
-                #  redis.set(redis_auth_prefix + openid, errmsg, 10)
-                redis.set(redis_auth_prefix + openid, errmsg)
+                redis.set(redis_auth_prefix + openid, errmsg, 10)
             else:
                 url = current_app.config['HOST_URL'] + '/auth-score/' + openid
                 content = u'用户名或密码不正确\n\n' +\
@@ -76,86 +73,27 @@ def get_info(openid, studentid, studentpwd, check_login=False):
 
         # 登录成功, 顺便保存相关信息
         else:
+            info_url = current_app.config['JW_INFO_URL']
             try:
-                score_res = score_page(score_url, session, proxy)
-                score_res.encoding = 'GBK'
-                # 解析 HTML 内容
-                soup = BeautifulSoup(score_res.text, "html.parser")
+                #  TODO 解析 HTML 内容
+                info_res = session.get(info_url)
+                info_res.encoding = 'GBK'
+                pattern = re.compile(r'<p>(.*?)</p>')
+                items = re.findall(pattern, info_res.text)
             except Exception as e:
                 current_app.logger.warning(u'登录成功，但是在校成绩查询或解析出错：%s,%s' % (
                     e, score_url))
                 if check_login:
                     errmsg = u"教务系统连接超时，请稍后重试"
-                    #  redis.set(redis_auth_prefix + openid, errmsg, 10)
-                    redis.set(redis_auth_prefix + openid, errmsg)
+                    redis.set(redis_auth_prefix + openid, errmsg, 10)
                 else:
                     content = u"学校的教务系统连接超时\n\n请稍后重试"
                     wechat_custom.send_text(openid, content)
             else:
-                # 提取当前学期的成绩
-                content = u''
-                score_info = []
-                for idx, tr in enumerate(soup.find_all('tr')[:-1]):
-                    if idx != 0:
-                        tds = tr.find_all('td')
-                        term = tds[0].contents[0]
-                        lesson_name = tds[1].contents[0]
-                        score = tds[3].contents[0]
-                        # 组装文本格式数据回复用户
-                        content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (
-                            term, lesson_name, score)
-                        # 组装数组格式的数据备用
-                        score_info.append({"term":term, "lesson_name": lesson_name,
-                                           "score": score})
-
                 # 保存用户真实姓名和所在班级信息
-                info_url = current_app.config['JW_INFO_URL']
-                try:
-                    info_res = session.get(info_url)
-                    info_res.encoding = 'GBK'
-                    pattern = re.compile(r'<p>(.*?)</p>')
-                    items = re.findall(pattern, info_res.text)
-                except Exception as e:
-                    current_app.logger.warning('登录成功, 但获取个人信息出错')
-                else:
-                    realname = items[1][3:]
-                    classname = items[2][3:]
-                    set_user_realname_and_classname(openid, realname, classname)
-
-                # 查询不到成绩
-                if not content:
-                    content = u'抱歉，没查询到结果\n可能还没公布成绩\n请稍候查询'
-                    wechat_custom.send_text(openid, content)
-                else:
-                    url = current_app.config['HOST_URL'] + '/score-report/' + openid
-                    data = [{
-                        'title': u'%s 期末成绩' % realname
-                    }, {
-                        'title': u'学期%s' % term,
-                        'url': url
-                    }, {
-                        'title': u'点击这里：分享成绩单到朋友圈',
-                        'url': url
-                    }]
-                    # 缓存结果 1 小时
-                    redis.set(redis_prefix + openid, data, 3600)
-                    # 发送微信
-                    wechat_custom.send_news(openid, data)
-                    # 更新缓存成绩，用于 Web 展示，不设置过期时间
-                    redis.hmset('wechat:user:scoreforweb:' + openid, {
-                        "real_name": realname,
-                        "school_term": term,
-                        "score_info": score_info,
-                        "update_time": time.strftime('%Y-%m-%d %H:%M:%S')
-                    })
-                # 账号密码保存数据库
-                if check_login:
-                    # 加密密码
-                    cipher = AESCipher(current_app.config['PASSWORD_SECRET_KEY'])
-                    studentpwd = cipher.encrypt(studentpwd)
-                    set_user_student_info(openid, studentid, studentpwd)
-                    #  redis.set(redis_auth_prefix + openid, 'ok', 10)
-                    redis.set(redis_auth_prefix + openid, 'ok')
+                realname = items[1][3:]
+                classname = items[2][3:]
+                set_user_realname_and_classname(openid, realname, classname)
 
 
 def login(studentid, studentpwd, url, session, proxy):
@@ -195,7 +133,7 @@ def score_page(score_url, session, proxy):
                 timeout=5)
     else:
         score_res = session.post(score_url, data=payload, allow_redirects=False,
-                proxies=current_app.config['SCHOOL_LAN_PROXIES'],
+                proxies=app.config['SCHOOL_LAN_PROXIES'],
                 timeout=5)
     return score_res
 

@@ -1,9 +1,6 @@
 # !/usr/bin/env python
 # _*_ coding:utf-8
-"""
-    保存用户的教务系统和图书馆的帐号信息
-    #  DONE
-"""
+#  保存用户的教务系统和图书馆的帐号信息
 
 
 from app import db
@@ -39,10 +36,11 @@ class Auth(db.Model):
 
     def save(self):
         db.session.add(self)
-        #  我在配置哪里写了自动commit, 这里应该是可以不commit的
         db.session.commit()
         return self
 
     def update(self):
         db.session.commit()
         return self
+
+
