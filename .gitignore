@@ -1,2 +1,4 @@
 __pycache__
+app.log.1
+*.fuse*
 

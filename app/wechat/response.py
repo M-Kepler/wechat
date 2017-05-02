@@ -8,9 +8,10 @@ import re
 from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
 from flask import current_app as app
-from .func_plugins import wechat_custom, music
+from .func_plugins import wechat_custom, music, score
 from .models import set_user_info, get_user_student_info
 from .func_plugins.state import get_user_last_interact_time, set_user_last_interact_time
+from .utils import AESCipher, init_wechat_sdk
 
 
 def handle_wechat_response(data):
@@ -190,10 +191,14 @@ def exam_grade():
     """
     user_student_info = get_user_student_info(openid)
     if user_student_info:
-        #  TODO 去完善score
-        pass
+        #  解密密码
+        cipher = AESCipher(app.config['PASSWORD_SECRET_KEY'])
+        studentpwd = cipher.decrypt(user_student_info['studentpwd'])
+        score.get_info(openid, user_student_info['studentid'], studentpwd)
+        return create_reply('查询中...', msg).render()
     else:
         url = app.config['HOST_URL'] + '/auth-score/' + openid
         content = app.config['AUTH_JW_TEXT'] % url
         reply = create_reply(content, msg)
         return reply.render()
+

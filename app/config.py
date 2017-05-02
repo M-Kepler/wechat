@@ -48,7 +48,7 @@ class WechatConfig(Config):
     HELP_TEXT = u"\n\n回复' ? '查看帮助信息\n"
     BAIDU_ANALYTICS = ""
     SCHOOL_LAN_PROXIES = ""
-    PASSWORD_SECRET_KEY = "hard to guess string"
+    PASSWORD_SECRET_KEY = "HardToGuessKeys."
 
     #  绑定认证URL
     AUTH_JW_TEXT = '\n<a href = "%s">［未绑定？点击这里绑定学号］</a>\n'

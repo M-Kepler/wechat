@@ -50,7 +50,9 @@ def send_news(openid, content):
 
 
 def send_message(data):
-    """ 使用客服接口主动推送消息 """
+    """ 使用客服接口主动推送消息
+    FIXME
+    """
     url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?" + \
             "access_token = %s" % get_wechat_access_token()
     try:
@@ -62,12 +64,15 @@ def send_message(data):
         current_app.logger.warning(content % (e, data))
     else:
         if response["errmsg"] != 'ok':
-            content = "客服推送失败: %s\n推送内容:%s"
+            content = "客服推送失败信息: %s\n推送内容:%s"
             current_app.logger.warning(content % (response, data))
-            if response["errcode"] == 40001:
-                #  access_token失效, 更新后重新发送
+            if response["errcode"] == 41001:
+                #  access_token失效, 或公众号未认证, 更新后重新发送
                 update_wechat_token()
                 send_message(data)
+            else:
+                current_app.logger.warning(response)
+
         return None
 
 

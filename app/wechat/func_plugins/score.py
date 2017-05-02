@@ -21,7 +21,9 @@ def get_info(openid, studentid, studentpwd, check_login=False):
     redis_auth_prefix = "wechat:user:auth:score:"
     user_score_cache = redis.get(redis_prefix + openid)
     if user_score_cache and not check_login:
-        content = ast.literal_eval(user_score_cache)
+        #  数据类型转换(把字符串转换成字典)
+        #  content = ast.literal_eval(user_score_cache)
+        content = eval(user_score_cache)
         wechat_custom.send_news(openid, content)
     else:
         # 缓存不存在成绩信息, 建立会话, 模拟登录爬取成绩
@@ -55,8 +57,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         if not res:
             if check_login:
                 errmsg = u"教务系统连接超时，请稍后重试"
-                #  redis.set(redis_auth_prefix + openid, errmsg, 10)
-                redis.set(redis_auth_prefix + openid, errmsg)
+                redis.set(redis_auth_prefix + openid, errmsg, 10)
             else:
                 content = u"教务系统连接超时\n\n请稍后重试"
                 wechat_custom.send_text(openid, content)
@@ -65,8 +66,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         elif res.status_code == 200 and 'alert' in res.text:
             if check_login:
                 errmsg = u"用户名或密码不正确"
-                #  redis.set(redis_auth_prefix + openid, errmsg, 10)
-                redis.set(redis_auth_prefix + openid, errmsg)
+                redis.set(redis_auth_prefix + openid, errmsg, 10)
             else:
                 url = current_app.config['HOST_URL'] + '/auth-score/' + openid
                 content = u'用户名或密码不正确\n\n' +\
@@ -86,8 +86,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     e, score_url))
                 if check_login:
                     errmsg = u"教务系统连接超时，请稍后重试"
-                    #  redis.set(redis_auth_prefix + openid, errmsg, 10)
-                    redis.set(redis_auth_prefix + openid, errmsg)
+                    redis.set(redis_auth_prefix + openid, errmsg, 10)
                 else:
                     content = u"学校的教务系统连接超时\n\n请稍后重试"
                     wechat_custom.send_text(openid, content)
@@ -102,8 +101,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                         lesson_name = tds[1].contents[0]
                         score = tds[3].contents[0]
                         # 组装文本格式数据回复用户
-                        content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (
-                            term, lesson_name, score)
+                        content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (term, lesson_name, score)
                         # 组装数组格式的数据备用
                         score_info.append({"term":term, "lesson_name": lesson_name,
                                            "score": score})
@@ -139,7 +137,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     }]
                     # 缓存结果 1 小时
                     redis.set(redis_prefix + openid, data, 3600)
-                    # 发送微信
+                    #  发送微信
                     wechat_custom.send_news(openid, data)
                     # 更新缓存成绩，用于 Web 展示，不设置过期时间
                     redis.hmset('wechat:user:scoreforweb:' + openid, {
@@ -154,8 +152,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     cipher = AESCipher(current_app.config['PASSWORD_SECRET_KEY'])
                     studentpwd = cipher.encrypt(studentpwd)
                     set_user_student_info(openid, studentid, studentpwd)
-                    #  redis.set(redis_auth_prefix + openid, 'ok', 10)
-                    redis.set(redis_auth_prefix + openid, 'ok')
+                    redis.set(redis_auth_prefix + openid, 'ok', 10)
 
 
 def login(studentid, studentpwd, url, session, proxy):

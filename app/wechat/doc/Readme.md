@@ -111,21 +111,21 @@ localhost来看看效果,觉得不错后再部署起来.
  * 被动模式: 用户主动发信息,才会出发威信回调公众号后台,并作出相应回答.
  * 主动调用接口: 后台主动发消息给某个用户(**难点**)
 
-
+* [被动回复消息与客服消息](https://my.oschina.net/u/2472104/blog/684229)
 
 * 暂时申请接口测试号进行开发  
 测试帐号拥有微信公众平台所有的接口
 
-* ```access_token```  
+* ```ACCESS_TOKEN```  
 [详见微信开发文档](http://link.zhihu.com/?target=https%3A//mp.weixin.qq.com/wiki/14/9f9c82c1af308e3b14ba9b973f99a8ba.html)<br />
 `access_token`是公众号的全局唯一票据，(获取access_token需要appid和appsecret)公众号调用各接口时都需使用access_token。
-开发者需要进行妥善保存。access_token的存储至少要保留512个字符空间。access_token的有效期目前为2个小时，需定时刷新，
+access_token的存储至少要保留512个字符空间。access_token的有效期目前为2个小时，需定时刷新，
 重复获取将导致上次获取的access_token失效。
 
-* ```openid```  
+* ```OPENID```  
 当前公众号下某用户的唯一标识
 
-* ```appid & appsecret```  
+* ```APPID & APPSECRET```  
 服务号才有,appid=appkey是id编号,appsecret是签名密钥. 所以就是用来确定身份的
 
 * ```JS-SDK```  
@@ -133,7 +133,7 @@ localhost来看看效果,觉得不错后再部署起来.
 选图、语音、位置等手机系统的能力，同时可以直接使用微信分享、扫一扫、卡券、支付等微信特有的能力，为微信用户提供更优质的网页体验。
 此文档面向网页开发者介绍微信JS-SDK如何使用及相关注意事项。
 
-* ```jsapi_ticket```  
+* ```JSAPI_TICKET```  
 [参考文档JS-SDK使用权限签名算法](http://link.zhihu.com/?target=https%3A//mp.weixin.qq.com/wiki/11/74ad127cc054f6b80759c40f77ec03db.html)<br />
 jsapi_ticket是公众号用于调用微信JS接口的临时票据。正常情况下，jsapi_ticket
 的有效期为7200秒，通过access_token来获取。由于获取jsapi_ticket的api调用次数
@@ -149,7 +149,7 @@ jsapi_ticket是公众号用于调用微信JS接口的临时票据。正常情况
 [如何使用JSSDK](http://www.jianshu.com/p/bb88f7520b9e)<br />
 微信提供的面向网页开发者的基于微信内的网页开发工具包.
 
-#### 未认证不可用接口
+### 未认证不可用接口
 
 * 未认证订阅号只可使用编辑模式下的自定义菜单功能，认证成功后才能使用自定义菜单的相关接口能力
 
@@ -250,10 +250,6 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 用户后台发送指令或点击菜单触发`click`事件,然后就会收到一条绑定链接,点击链接进入`view.py/auth-score/<openid>`
 然后`func_plugins/score.py`拿到用户输入的`studentid`和`studentpwd`进行模拟登录,并获取登录后的页面,
 对页面内容进行解析,获取到需要的信息,保存数据库
-
-
-
-
 
 
 ## UI 和文章排版

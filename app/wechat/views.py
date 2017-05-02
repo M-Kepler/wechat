@@ -8,6 +8,7 @@ from .utils import check_wechat_signature, get_jsapi_signature_data
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
+import ast
 
 
 @wechat.route('/test')
@@ -71,18 +72,48 @@ def auth_score_result(openid=None):
         abort(404)
 
 
-#  XXX 图书馆这个先不做了吧
+@wechat.route('/score-report/<openid>', methods=['GET', 'POST'])
+def school_report_card(openid=None):
+    """ 学生成绩单
+    """
+    if is_user_exists(openid):
+        jsapi = get_jsapi_signature_data(request.url)
+        jsapi['jsApiList'] = ['onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'onMenuShareQQ',
+                'onMenuShareWeibo',
+                'onMenuShareQZone']
+        score_cache = redis.hgetall('wechat:user:scoreforweb:' + openid)
+        if score_cache:
+            score_info = ast.literal_eval(score_cache['score_info'])
+            real_name = score_cache['real_name'].decode('utf-8')
+            return render_template('score.html',
+                    real_name = real_name,
+                    school_term = score_cache['term'],
+                    score_info = score_info,
+                    update_time = score_cache['update_time'],
+                    baidu_analyics= current_app.config['BAIDU_ANALYTICS'],
+                    jsapi = Markup(jsapi)
+                    )
+        else:
+            abort(404)
+    else:
+        abort(404)
+
+
 @wechat.route('/auth-library/<openid>', methods=['GET', 'POST'])
 def auth_library(openid=None):
-    """ 绑定图书馆帐号 """
+    """ 绑定图书馆帐号
+    XXX 图书馆这个先不做了吧
+    """
     if request.method == 'POST':
         libraryid = request.form.get('libraryid', '')
         librarypwd = request.form.get('librarypwd', '')
         if libraryid and librarypwd and is_user_exists(openid):
-            errormsg = 'ok'
+            errmsg = 'ok'
             pass
         else:
-            errormsg = '卡号或密码不正确'
+            errmsg = '卡号或密码不正确'
 
 
 @wechat.route('/auth-library/<openid>/result', methods=['GET'])
