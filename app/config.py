@@ -35,6 +35,7 @@ class TestingConfig(Config):
 
 
 class WechatConfig(Config):
+    MYOPENID = 'oApGExFBMSuX7JogXTMYdj9SGlyg'
     APPID = 'wx1638afb292624d0a'
     APPSECRET = '3436a11a7f5fd3d2c1225967e5aeb049'
     TOKEN = "kepler"

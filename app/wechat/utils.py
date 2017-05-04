@@ -28,6 +28,7 @@ def init_wechat_sdk():
     ticket_expires_at = redis.get("wechat:jsapi_ticket_expires_at")
     if access_token and jsapi_ticket:
         wechat = {
+                'client':wechat_client,
                 'appid' : current_app.config['APPID'],
                 'appsecret' : current_app.config['APPSECRET'],
                 'token' : current_app.config['TOKEN'],
@@ -47,6 +48,7 @@ def init_wechat_sdk():
         redis.set("wechat:jsapi_ticket", jsapi_ticket['ticket'], 7000)
         redis.set("wechat:jsapi_ticket_expires_at", jsapi_ticket['expires_in'], 7000)
         wechat = {
+                'client':wechat_client,
                 'appid' : current_app.config['APPID'],
                 'appsecret' : current_app.config['APPSECRET'],
                 'token' : current_app.config['TOKEN'],
@@ -79,6 +81,7 @@ def oauth_request(func):
     @wraps(func)
     def decorated_func(*args, **kwargs):
         code = request.args.get('code', None)
+        wechat_client = WeChatClient(current_app.config['APPID'],current_app.config['APPSECRET'])
         url = wechat_client.oauth.authorize_url(request.url)
         if code:
             try:
@@ -105,7 +108,8 @@ def update_wechat_token():
     jsapi_ticket = wechat['jsapi_ticket']
     redis.set("wechat:jsapi_ticket", jsapi_ticket['ticket'], 7000)
     redis.set("wechat:jsapi_ticket_expires_at", jsapi_ticket['expires_in'], 7000)
-    current_app.logger.warning("刷新wechat_token结束,将重新发送")
+
+    current_app.logger.warning("运行update_wechat_token结束,将重新发送")
 
 
 def get_wechat_access_token():

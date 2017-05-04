@@ -7,6 +7,7 @@
 import re
 from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
+from wechatpy.replies import TransferCustomerServiceReply
 from flask import current_app as app
 from .func_plugins import wechat_custom, music, score
 from .models import set_user_info, get_user_student_info
@@ -24,13 +25,12 @@ def handle_wechat_response(data):
     set_user_info(openid)
     try:
         #  根据消息类型(key值)选择回复方法
-        #  XXX  理解这个用法, 下面(第84行)还有(在wechatpy/replies.py源码里也可以看到)
         response = msg_type_resp[msg.type]()
     except KeyError:
         #  默认回复消息
         response = 'success'
-        set_user_last_interact_time(openid, msg.time)
-
+    #  保存最后一次交互时间
+    set_user_last_interact_time(openid, msg.time)
     return response
 
 
@@ -140,14 +140,16 @@ def command_not_found():
     return reply.render()
 
 
-#  def command_not_found():
-    #  """ 非关键字回复
-    #  """
-    #  # TODO 转接客服接口回复信息
-    #  content = app.config['COMMAND_NOT_FOUND'] + app.config['HELP_TEXT']
-    #  wechat_custom.send_text(openid, content)
-    #  #  转发到微信多客服系统
-    #  return wechat.group_transfer_message()
+'''
+def command_not_found():
+    """ 非关键字回复
+    """
+    #  转接客服接口回复信息
+    content = app.config['COMMAND_NOT_FOUND'] + app.config['HELP_TEXT']
+    wechat_custom.send_text(openid, content)
+    #  转发到微信多客服系统
+    return TransferCustomerServiceReply()
+'''
 
 
 def all_command():

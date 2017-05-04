@@ -4,13 +4,15 @@ from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from . import wechat
 from app import redis
-from .utils import check_wechat_signature, get_jsapi_signature_data
+from .utils import check_wechat_signature, oauth_request, get_jsapi_signature_data
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
 import ast
 
 
+
+@oauth_request
 @wechat.route('/test')
 def test():
     return 'Hi There'

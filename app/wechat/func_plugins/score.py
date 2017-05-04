@@ -11,9 +11,10 @@ from flask import current_app
 from app import redis
 from bs4 import BeautifulSoup, SoupStrainer
 from ..models import set_user_student_info, set_user_realname_and_classname
-from ..utils import AESCipher
+from ..utils import AESCipher, init_wechat_sdk
 from . import wechat_custom
-
+from wechatpy.replies import ArticlesReply
+from wechatpy import parse_message, create_reply, events
 
 def get_info(openid, studentid, studentpwd, check_login=False):
     """ 登录教务系统, 并保存必要信息"""
@@ -23,8 +24,12 @@ def get_info(openid, studentid, studentpwd, check_login=False):
     if user_score_cache and not check_login:
         #  数据类型转换(把字符串转换成字典)
         #  content = ast.literal_eval(user_score_cache)
-        content = eval(user_score_cache)
+        content = ast.literal_eval(user_score_cache.decode())
         wechat_custom.send_news(openid, content)
+        #  wechat = init_wechat_sdk()
+        #  wechat_client = wechat['client']
+        #  wechat_client.message.send_articles(openid, content)
+
     else:
         # 缓存不存在成绩信息, 建立会话, 模拟登录爬取成绩
         session = requests.Session()
@@ -139,6 +144,10 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     redis.set(redis_prefix + openid, data, 3600)
                     #  发送微信
                     wechat_custom.send_news(openid, data)
+                    #  wechat = init_wechat_sdk()
+                    #  wechat_client = wechat['client']
+                    #  wechat_client.message.send_articles(openid, content)
+
                     # 更新缓存成绩，用于 Web 展示，不设置过期时间
                     redis.hmset('wechat:user:scoreforweb:' + openid, {
                         "real_name": realname,

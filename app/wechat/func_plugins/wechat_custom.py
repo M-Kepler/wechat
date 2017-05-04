@@ -70,9 +70,6 @@ def send_message(data):
                 #  access_token失效, 或公众号未认证, 更新后重新发送
                 update_wechat_token()
                 send_message(data)
-            else:
-                current_app.logger.warning(response)
-
         return None
 
 
