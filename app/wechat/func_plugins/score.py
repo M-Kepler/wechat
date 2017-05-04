@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup, SoupStrainer
 from ..models import set_user_student_info, set_user_realname_and_classname
 from ..utils import AESCipher, init_wechat_sdk
 from . import wechat_custom
-from wechatpy.replies import ArticlesReply
 from wechatpy import parse_message, create_reply, events
 
 def get_info(openid, studentid, studentpwd, check_login=False):
@@ -23,15 +22,14 @@ def get_info(openid, studentid, studentpwd, check_login=False):
     user_score_cache = redis.get(redis_prefix + openid)
     if user_score_cache and not check_login:
         #  数据类型转换(把字符串转换成字典)
-        #  content = ast.literal_eval(user_score_cache)
         content = ast.literal_eval(user_score_cache.decode())
         wechat_custom.send_news(openid, content)
         #  wechat = init_wechat_sdk()
-        #  wechat_client = wechat['client']
-        #  wechat_client.message.send_articles(openid, content)
+        #  client = wechat['client']
+        #  client.message.send_articles(openid, content)
 
     else:
-        # 缓存不存在成绩信息, 建立会话, 模拟登录爬取成绩
+        # 缓存不存在成绩信息, 建立会话, 模拟登录爬取信息
         session = requests.Session()
         session.headers.update({
             'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; ' +
@@ -58,7 +56,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                 current_app.logger.warning(u'内网查询出错：%s' % e)
                 res = None
 
-        #  执行login后未返回信息
+        #  登录没东西返回可判定为超时
         if not res:
             if check_login:
                 errmsg = u"教务系统连接超时，请稍后重试"
@@ -79,7 +77,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     u'\n\n绑定后重试操作即可'
                 wechat_custom.send_text(openid, content)
 
-        # 登录成功, 顺便保存相关信息
+        #  否则就是登录成功, 顺便保存相关信息
         else:
             try:
                 score_res = score_page(score_url, session, proxy)
@@ -132,28 +130,33 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                 else:
                     url = current_app.config['HOST_URL'] + '/score-report/' + openid
                     data = [{
-                        'title': u'%s 期末成绩' % realname
-                    }, {
-                        'title': u'学期%s' % term,
-                        'url': url
-                    }, {
-                        'title': u'点击这里：分享成绩单到朋友圈',
-                        'url': url
-                    }]
+                        'title':u'%s - 成绩' %realname,
+                        'description':'',
+                        'url':url}]
+                    #  data = [{
+                        #  'title': u'%s - 期末成绩' % realname,
+                        #  'description':'',
+                        #  'url':''
+                    #  }, {
+                        #  'title': u'%s学期' % term,
+                        #  'description':'',
+                        #  'url': url
+                    #  }, {
+                        #  'title': u'点击这里：分享成绩单到朋友圈',
+                        #  'description':'',
+                        #  'url': url
+                    #  }]
+
                     # 缓存结果 1 小时
                     redis.set(redis_prefix + openid, data, 3600)
                     #  发送微信
                     wechat_custom.send_news(openid, data)
-                    #  wechat = init_wechat_sdk()
-                    #  wechat_client = wechat['client']
-                    #  wechat_client.message.send_articles(openid, content)
 
                     # 更新缓存成绩，用于 Web 展示，不设置过期时间
                     redis.hmset('wechat:user:scoreforweb:' + openid, {
-                        "real_name": realname,
-                        "school_term": term,
-                        "score_info": score_info,
-                        "update_time": time.strftime('%Y-%m-%d %H:%M:%S')
+                        "real_name" : realname,
+                        "score_info" : score_info,
+                        "update_time" : time.strftime('%Y-%m-%d %H:%M:%S')
                     })
                 # 账号密码保存数据库
                 if check_login:

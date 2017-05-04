@@ -23,18 +23,18 @@
     <div class="container js_container">
         <div class="page">
             <div class="hd">
-                <h1 class="page_title">{{ real_name }} 期末成绩单</h1>
+                <h1 class="page_title">{{ real_name }} 的成绩单</h1>
                 <p class="page_desc">点击右上角按钮分享</p>
             </div>
-            <div class="weui_cells_title">{{ school_year }} 第 {{ school_term }} 学期</div>
+            {% for item in score_info %}
+            <div class="weui_cells_title">第 {{item['term']}} 学期</div>
             <div class="weui_cells">
-                {% for data in score_info %}
                 <div class="weui_cell">
                     <div class="weui_cell_bd weui_cell_primary">
-                        <p>{{ data.lesson_name }}</p>
+                        <p>{{ item['lesson_name'] }}</p>
                     </div>
-                    <div class="weui_cell_ft">{{ data.score }} 分</div>
-                </div>    
+                    <div class="weui_cell_ft">{{ item['score'] }} 分</div>
+                </div>
                 {% endfor %}
             </div>
             <p class="weui_cells_tips">数据更新于：{{ update_time }}</p>
