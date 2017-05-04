@@ -181,7 +181,6 @@ def play_music():
     """随机播放音乐"""
     music.get_douban_fm(openid)
     return 'success'
-    #  return create_reply('这里将随机一首音乐给你', msg).render()
 
 
 def school_news():

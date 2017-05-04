@@ -5,7 +5,6 @@ import requests
 from flask import current_app
 from . import wechat_custom
 
-
 #  @celery.task
 def get_douban_fm(openid):
     """抓取豆瓣FM"""
@@ -24,6 +23,6 @@ def get_douban_fm(openid):
     else:
         # 客服接口推送音乐必须要有 thumb_media_id
         thumb_media_id = current_app.config["MUSIC_THUMB_MEDIA_ID"]
-        wechat_custom.send_music(openid, title, desc, music_url, thumb_media_id)
+        wechat_custom.send_music(openid, music_url, thumb_media_id, title, desc)
 
 

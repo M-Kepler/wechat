@@ -76,8 +76,7 @@ def auth_score_result(openid=None):
 
 @wechat.route('/score-report/<openid>', methods=['GET', 'POST'])
 def school_report_card(openid=None):
-    """ 学生成绩单
-    """
+    """ 学生成绩单 """
     if is_user_exists(openid):
         jsapi = get_jsapi_signature_data(request.url)
         jsapi['jsApiList'] = ['onMenuShareTimeline',
@@ -87,13 +86,15 @@ def school_report_card(openid=None):
                 'onMenuShareQZone']
         score_cache = redis.hgetall('wechat:user:scoreforweb:' + openid)
         if score_cache:
-            score_info = ast.literal_eval(score_cache['score_info'])
-            real_name = score_cache['real_name'].decode('utf-8')
-            return render_template('score.html',
+            score_info = ast.literal_eval(score_cache[b'score_info'].decode())
+            real_name = score_cache[b'real_name'].decode('utf-8')
+            update_time = score_cache[b'update_time']
+            #  return ' %s %s ' %  (real_name, update_time)
+            #  TODO 能正常收到请求, 但没东西显示, 是score_info的问题
+            return render_template('wechat/score.html',
                     real_name = real_name,
-                    school_term = score_cache['term'],
                     score_info = score_info,
-                    update_time = score_cache['update_time'],
+                    update_time = score_cache[b'update_time'],
                     baidu_analyics= current_app.config['BAIDU_ANALYTICS'],
                     jsapi = Markup(jsapi)
                     )
