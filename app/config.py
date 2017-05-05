@@ -85,7 +85,7 @@ class WechatConfig(Config):
                     },
                     {
                         "type" : "click",
-                        "name" : "成绩",
+                        "name" : "期末成绩",
                         "key" : "score"
                     }
                 ]

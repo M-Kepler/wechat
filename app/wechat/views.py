@@ -4,7 +4,7 @@ from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from . import wechat
 from app import redis
-from .utils import check_wechat_signature, oauth_request, get_jsapi_signature_data
+from .utils import check_wechat_signature, get_jsapi_signature_data
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
@@ -12,7 +12,6 @@ import ast
 
 
 
-@oauth_request
 @wechat.route('/test')
 def test():
     return 'Hi There'
@@ -37,12 +36,11 @@ def auth_score(openid=None):
         studentpwd = request.form.get('studentpwd', '')
         #  根据用户输入的信息, 进行模拟登录
         if studentid and studentpwd and is_user_exists(openid):
-           score.get_info(openid, studentid, studentpwd, check_login=True)
-           #  确定是否绑定成功的标志
-           errmsg = 'ok'
+            score.get_info(openid, studentid, studentpwd, check_login=True)
+            errmsg = 'ok'
         else:
-            errmsg = '学号或密码输入错误'
-        return jsonify({'errmsg':errmsg})
+            errmsg = u'学号或密码格式不合法'
+        return jsonify({'errmsg': errmsg})
     elif is_user_exists(openid):
         jsapi = get_jsapi_signature_data(request.url)
         jsapi['jsApiList'] = ['hideAllNonBaseMenuItem']
@@ -50,7 +48,7 @@ def auth_score(openid=None):
                 title = '微信查成绩',
                 desc = "请绑定教务系统",
                 username_label = '学号',
-                username_label_placeholder = '请输入学号',
+                username_label_placeholder = '请输入你的学号',
                 password_label_placeholder = '教务系统密码',
                 baidu_analyics = current_app.config['BAIDU_ANALYTICS'],
                 jsapi = Markup(jsapi)
@@ -59,7 +57,7 @@ def auth_score(openid=None):
         abort(404)
 
 
-@wechat.route('/auth-score/<openid>/result', methods=['GET', 'POST'])
+@wechat.route('/auth-score/<openid>/result', methods=['GET'])
 def auth_score_result(openid=None):
     """ 查询学号绑定结果 """
     if is_user_exists(openid):
@@ -67,7 +65,7 @@ def auth_score_result(openid=None):
         errmsg = redis.get(redis_prefix + openid)
         if errmsg:
             redis.delete(redis_prefix + openid)
-            return jsonify({'errmsg':errmsg})
+            return jsonify({'errmsg' : errmsg})
         else:
             abort(404)
     else:
@@ -88,13 +86,11 @@ def school_report_card(openid=None):
         if score_cache:
             score_info = ast.literal_eval(score_cache[b'score_info'].decode())
             real_name = score_cache[b'real_name'].decode('utf-8')
-            update_time = score_cache[b'update_time']
-            #  return ' %s %s ' %  (real_name, update_time)
-            #  TODO 能正常收到请求, 但没东西显示, 是score_info的问题
             return render_template('wechat/score.html',
                     real_name = real_name,
+                    school_term = score_cache[b'school_term'].decode('utf-8'),
                     score_info = score_info,
-                    update_time = score_cache[b'update_time'],
+                    update_time = score_cache[b'update_time'].decode('utf-8'),
                     baidu_analyics= current_app.config['BAIDU_ANALYTICS'],
                     jsapi = Markup(jsapi)
                     )

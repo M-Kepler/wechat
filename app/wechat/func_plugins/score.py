@@ -24,9 +24,6 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         #  数据类型转换(把字符串转换成字典)
         content = ast.literal_eval(user_score_cache.decode())
         wechat_custom.send_news(openid, content)
-        #  wechat = init_wechat_sdk()
-        #  client = wechat['client']
-        #  client.message.send_articles(openid, content)
 
     else:
         # 缓存不存在成绩信息, 建立会话, 模拟登录爬取信息
@@ -94,21 +91,6 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     content = u"学校的教务系统连接超时\n\n请稍后重试"
                     wechat_custom.send_text(openid, content)
             else:
-                # 提取当前学期的成绩
-                content = u''
-                score_info = []
-                for idx, tr in enumerate(soup.find_all('tr')[:-1]):
-                    if idx != 0:
-                        tds = tr.find_all('td')
-                        term = tds[0].contents[0]
-                        lesson_name = tds[1].contents[0]
-                        score = tds[3].contents[0]
-                        # 组装文本格式数据回复用户
-                        content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (term, lesson_name, score)
-                        # 组装数组格式的数据备用
-                        score_info.append({"term":term, "lesson_name": lesson_name,
-                                           "score": score})
-
                 # 保存用户真实姓名和所在班级信息
                 info_url = current_app.config['JW_INFO_URL']
                 try:
@@ -121,7 +103,25 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                 else:
                     realname = items[1][3:]
                     classname = items[2][3:]
+                    #  school_term = items[4][3:]
+                    school_term = '2016-2017_2'
                     set_user_realname_and_classname(openid, realname, classname)
+
+                # 提取当前学期的成绩
+                content = u''
+                score_info = []
+                for idx, tr in enumerate(soup.find_all('tr')[:-1]):
+                    #  XXX 这里是爬取全部在提取, 修改为直接爬取对应的数据
+                    if idx != 0:
+                        tds = tr.find_all('td')
+                        term = tds[0].contents[0]
+                        lesson_name = tds[1].contents[0]
+                        score = tds[3].contents[0]
+                        if term == school_term:
+                            # 组装文本格式数据回复用户
+                            content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (school_term, lesson_name, score)
+                            # 组装数组格式的数据备用
+                            score_info.append({"term":term, "lesson_name": lesson_name, "score": score})
 
                 # 查询不到成绩
                 if not content:
@@ -130,22 +130,10 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                 else:
                     url = current_app.config['HOST_URL'] + '/score-report/' + openid
                     data = [{
-                        'title':u'%s - 成绩' %realname,
+                        'title': u'%s - %s学期成绩' % (realname, school_term),
                         'description':'',
-                        'url':url}]
-                    #  data = [{
-                        #  'title': u'%s - 期末成绩' % realname,
-                        #  'description':'',
-                        #  'url':''
-                    #  }, {
-                        #  'title': u'%s学期' % term,
-                        #  'description':'',
-                        #  'url': url
-                    #  }, {
-                        #  'title': u'点击这里：分享成绩单到朋友圈',
-                        #  'description':'',
-                        #  'url': url
-                    #  }]
+                        'url':url
+                    }]
 
                     # 缓存结果 1 小时
                     redis.set(redis_prefix + openid, data, 3600)
@@ -155,6 +143,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     # 更新缓存成绩，用于 Web 展示，不设置过期时间
                     redis.hmset('wechat:user:scoreforweb:' + openid, {
                         "real_name" : realname,
+                        "school_term" : school_term,
                         "score_info" : score_info,
                         "update_time" : time.strftime('%Y-%m-%d %H:%M:%S')
                     })

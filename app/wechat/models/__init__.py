@@ -17,7 +17,6 @@ import time
 from app import db, redis
 from flask import current_app
 from wechatpy import WeChatClient
-from wechatpy.oauth import WeChatOAuth
 from .user import WechatUser
 from .auth import Auth
 from ..func_plugins.state import get_user_last_interact_time
@@ -34,7 +33,6 @@ def set_user_info(openid):
         #  用户不在缓存也在数据库中也找不到, 将用户信息插入数据库
         if not user_info:
             try:
-                #  client = WeChatClient(current_app.config['APPID'], current_app.config['APPSECRET'])
                 wechat = init_wechat_sdk()
                 client = wechat['client']
                 user_info = client.user.get(openid)

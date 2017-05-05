@@ -261,9 +261,28 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 ## UI 和文章排版
 
 
-# TODO List
+# 清单
+
+
+## TODO
 
 1. 多客服那里需要获取和更新access_token,jsapi_ticket, 现在无法验证正确性, 或许
 可以进shell调试一下
 * score.py还没完善, 登录教务系统爬取成绩, 应该不难吧
 * auth.html里引用了很多js, 有一个是和后台view传数据的
+* `utils.py/init_wechat_sdk下获取access_token`那里出错
+* access_token的管理(获取和缓存和更新)
+* 客服接口
+
+
+## FIXME
+
+1. 明明绑定成功了,但却还是显示失败而且没有失败信息(/func_plugins/score.py)下的
+`redis_auth_prefix = "wechat:user:auth:score:"`
+
+
+
+## XXX
+
+
+## DONE

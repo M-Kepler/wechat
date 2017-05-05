@@ -124,10 +124,13 @@ def get_wechat_access_token():
 
 def get_jsapi_signature_data(url):
     """ 获取jsapi前端签名数据 """
-    noncestr = generate_random_str(16)
     timestamp = int(time.time())
+    noncestr = generate_random_str(16)
+    wechat = init_wechat_sdk()
+    client = wechat['client']
+    ticket = wechat['jsapi_ticket']
     wechat_client = WeChatClient(current_app.config['APPID'], current_app.config['APPSECRET'])
-    signature = wechat_client.jsapi.get_jsapi_signature
+    signature = wechat_client.jsapi.get_jsapi_signature(noncestr, ticket, timestamp, url)
     return{
         "appId" : current_app.config['APPID'],
         "timestamp" : timestamp,
