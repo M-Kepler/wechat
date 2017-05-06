@@ -108,17 +108,17 @@ class WechatConfig(Config):
             },
 
             {
-                "name":"菜单三",
+                "name":"生活",
                 "sub_button":[
                     {
                         "type":"click",
-                        "name":"来首歌",
+                        "name":"随机音乐",
                         "key" :"music"
                     },
                     {
                         "type":"click",
-                        "name":"点击事件2",
-                        "key" :"test2"
+                        "name":"天气预报",
+                        "key" :"weather"
                     },
                     {
                         "type":"click",

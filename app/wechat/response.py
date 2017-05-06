@@ -9,7 +9,7 @@ from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
 from wechatpy.replies import TransferCustomerServiceReply
 from flask import current_app as app
-from .func_plugins import wechat_custom, music, score
+from .func_plugins import wechat_custom, music, score, weather
 from .models import set_user_info, get_user_student_info
 from .func_plugins.state import get_user_last_interact_time, set_user_last_interact_time
 from .utils import AESCipher, init_wechat_sdk
@@ -74,6 +74,7 @@ def response_text():
     """
     commands= {
         u'^绑定':auth_url,
+        u'^天气': get_weather,
         u'^更新菜单':update_menu_setting,
         u'\?|^？|^help|^帮助':all_command
             }
@@ -87,6 +88,14 @@ def response_text():
     if not command_match:
         response = command_not_found()
     return response
+
+
+@set_msg_type('location')
+def response_location():
+    location_x = msg.location_x
+    location_y = msg.location_y
+    get_weather(openid, location_x, location_y)
+    return create_reply('收到位置信息，经度%s, 纬度%s ' % (location_x, location_y), msg).render()
 
 
 @set_msg_type('image')
@@ -111,11 +120,12 @@ def response_click():
     """ 回复菜单的点击事件 """
     commands= {
             'music' : play_music,
-            'school_news' :school_news,
-            'auth':auth_url,
-            'help':all_command,
-            'music':play_music,
-            'score':exam_grade
+            'school_news' : school_news,
+            'auth' : auth_url,
+            'help' : all_command,
+            'music' : play_music,
+            'score' : exam_grade,
+            'weather': get_weather
             }
     response = commands[msg.key]()
     return response
@@ -187,6 +197,13 @@ def school_news():
     """学校新闻 """
     return create_reply('这将是学校新闻的回复', msg).render()
 
+
+def get_weather():
+    """ 获取天气信息 """
+    weather.get(openid)
+    return 'success'
+
+
 def exam_grade():
     """查询成绩
     """
@@ -196,7 +213,7 @@ def exam_grade():
         cipher = AESCipher(app.config['PASSWORD_SECRET_KEY'])
         studentpwd = cipher.decrypt(user_student_info['studentpwd'])
         score.get_info(openid, user_student_info['studentid'], studentpwd)
-        return create_reply('查询中...', msg).render()
+        return create_reply('查询完成', msg).render()
     else:
         url = app.config['HOST_URL'] + '/auth-score/' + openid
         content = app.config['AUTH_JW_TEXT'] % url

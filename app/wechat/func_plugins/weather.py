@@ -1,58 +1,91 @@
-# !/usr/bin/env python
-# _*_ coding:utf-8
-
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from flask import current_app
+import hashlib
+import urllib.request
+import hmac, time, requests, re, json
+from . import wechat_custom
 
-from wechatpy import parse_message, create_reply
-from wechatpy.replies import TextReply, ArticlesReply
-from wechatpy.utils import check_signature
-from wechatpy.exceptions import InvalidSignatureException
-from webcore.weatherservices import cityweather
-from isay9685.models import CityWeahter
-import json
-import time
-from datetime import datetime
+def day_of_week(offset=0):
+    """获取星期几"""
+    day_of_week = int(time.strftime('%w')) + offset
+    days = [u'周日', u'周一', u'周二', u'周三', u'周四', u'周五', u'周六',
+            u'周日', u'周一']
+    prefix = [u'今天', u'明天', u'后天']
+    return prefix[offset] + days[day_of_week]
 
-def replyWeather(cityname, msg):
-    reply = None
-    dateid = time.strftime("%Y%m%d")
-    timeid = time.strftime("%H")
-    cWeahter = CityWeahter.objects.filter(dateid=dateid, timeid=timeid, cityname=cityname)
-    if cWeahter:
-        weatherstr = cWeahter[0].wheather
-    else:
-        weatherstr = cityweather.getcityweather(cityname)
-        cw = CityWeahter(dateid=dateid, timeid=timeid, cityname=cityname, wheather=weatherstr, createtime=datetime.now())
-        cw.save()
-    # weatherstr = '''{"error":0,"status":"success","date":"2015-06-15","results":[{"currentCity":"合肥","pm25":"126","index":[{"title":"穿衣","zs":"热","tipt":"穿衣指数","des":"天气热，建议着短裙、短裤、短薄外套、T恤等夏季服装。"},{"title":"洗车","zs":"不宜","tipt":"洗车指数","des":"不宜洗车，未来24小时内有雨，如果在此期间洗车，雨水和路上的泥水可能会再次弄脏您的爱车。"},{"title":"旅游","zs":"适宜","tipt":"旅游指数","des":"温度适宜，又有较弱降水和微风作伴，会给您的旅行带来意想不到的景象，适宜旅游，可不要错过机会呦！"},{"title":"感冒","zs":"较易发","tipt":"感冒指数","des":"相对今天出现了较大幅度降温，较易发生感冒，体质较弱的朋友请注意适当防护。"},{"title":"运动","zs":"较不宜","tipt":"运动指数","des":"有降水，推荐您在室内进行健身休闲运动；若坚持户外运动，须注意携带雨具并注意避雨防滑。"},{"title":"紫外线强度","zs":"弱","tipt":"紫外线强度指数","des":"紫外线强度较弱，建议出门前涂擦SPF在12-15之间、PA+的防晒护肤品。"}],"weather_data":[{"date":"周一 06月15日 (实时：27℃)","dayPictureUrl":"http://api.map.baidu.com/images/weather/day/xiaoyu.png","nightPictureUrl":"http://api.map.baidu.com/images/weather/night/zhongyu.png","weather":"小雨转中雨","wind":"南风微风","temperature":"28 ~ 22℃"},{"date":"周二","dayPictureUrl":"http://api.map.baidu.com/images/weather/day/dayu.png","nightPictureUrl":"http://api.map.baidu.com/images/weather/night/xiaoyu.png","weather":"大雨转小雨","wind":"北风微风","temperature":"26 ~ 21℃"},{"date":"周三","dayPictureUrl":"http://api.map.baidu.com/images/weather/day/xiaoyu.png","nightPictureUrl":"http://api.map.baidu.com/images/weather/night/yin.png","weather":"小雨转阴","wind":"北风微风","temperature":"24 ~ 20℃"},{"date":"周四","dayPictureUrl":"http://api.map.baidu.com/images/weather/day/duoyun.png","nightPictureUrl":"http://api.map.baidu.com/images/weather/night/duoyun.png","weather":"多云","wind":"东北风3-4级","temperature":"28 ~ 20℃"}]}]} '''
-    weatherjson = json.loads(weatherstr)
-    if weatherjson and weatherjson.get('error') == 0:
-        date = weatherjson.get('date')
-        result = weatherjson.get('results')[0]
-        currentCity = result.get('currentCity')
-        pm25 = result.get('pm25')
-        wheathernowdatas = result.get('weather_data')[0]
-        weathermsg = repr(wheathernowdatas)
-        reply = ArticlesReply(message=msg)
-        # simply use dict as article
-        reply.add_article({
-            'title': wheathernowdatas.get('date'),
-        })
-        reply.add_article({
-            'title':
-             u'%s %s %s' % (wheathernowdatas.get('weather') , wheathernowdatas.get('temperature') , wheathernowdatas.get('wind')) \
-             + '\r\n'\
-             + '\r\n'\
-             + currentCity + u' PM2.5: ' + pm25  ,
-            'url': 'http://isay9685.duapp.com'
-        })
-        reply.add_article({
-            'title':  u'白天',
-            'image': wheathernowdatas.get('dayPictureUrl'),
-        })
-        reply.add_article({
-            'title':  u'晚上',
-            'image': wheathernowdatas.get('nightPictureUrl'),
-        })
-    return reply
+def download(url):
+    try:
+        html = urllib.request.urlopen(url)
+        html = html.read()
+    except Exception as e:
+        current_app.logger.Warning("获取信息失败")
+    return html
+
+def get(openid):
+    # all全部的天气数据
+    all_url = 'https://free-api.heweather.com/v5/weather?city=CN101300507&key=5c043b56de9f4371b0c7f8bee8f5b75e'
+    # 3天预报
+    forecast_url = 'https://free-api.heweather.com/v5/forecast?city=CN101300507&key=5c043b56de9f4371b0c7f8bee8f5b75e'
+    #生活指数
+    sugg_url = 'https://free-api.heweather.com/v5/suggestion?city=CN101300507&key=5c043b56de9f4371b0c7f8bee8f5b75e'
+    # 天气图标
+    photo_url = 'https://cdn.heweather.com/cond_icon/100.png'
+
+    #天气情况的内容提取------------开始
+    weather_res = download(forecast_url)
+    html = weather_res.decode('utf-8')
+
+    max_tmp = re.findall('max":"(.*?)"', html)[0]  #最高温度
+    min_tmp = re.findall('min":"(.*?)"', html)[0]  #最低温度
+    photo = re.findall('code_d":"(.*?)"', html)[0] #天气图片
+    txt_d = re.findall('txt_d":"(.*?)"', html)[0] #天气情况
+    dir = re.findall('dir":"(.*?)"', html)[0]  # 风向
+    sc = re.findall('sc":"(.*?)"', html)[0]  # 风力
+    wind = "%s  %s" %(sc, dir)
+
+
+    weather_data = u"温度：%s℃ - %s℃   %s\n%s" % (min_tmp, max_tmp,txt_d, wind)
+
+    #生活指数等内容的提取-----------开始
+    life_res = download(sugg_url)
+    html = life_res.decode('utf-8')
+    brf = re.findall('brf":"(.*?)"', html)
+    txt = re.findall('txt":"(.*?)"', html)
+
+    comf_brf = brf[0]#舒适度指数
+    comf_txt = txt[0]
+    comf = comf_brf + '\n' + comf_txt
+
+    drsg_brf = brf[3]#穿衣
+    drsg_txt = txt[3]
+    drsg = drsg_brf + '\n' + drsg_txt
+
+    flu_brf = brf[4]#感冒
+    flu_txt = txt[4]
+    flu = flu_brf+ '\n' + flu_txt
+
+    trav_brf = brf[6]#出行指数
+    trav_txt = txt[6]
+    trav = trav_brf + '\n' + trav_txt
+
+    life_data = weather_data + '\n\n' + u"舒适度：%s\n\n穿衣指数：%s\n\n感冒指数：%s\n\n出行指数：%s" % (comf, drsg, flu, trav)
+
+    #  life_data.append({
+        #  "comf" : comf,
+        #  "drsg" : drsg,
+        #  "flu" : flu,
+        #  "sport" : sport,
+        #  "trav" : trav,
+        #  "uv" : uv
+        #  })
+
+    content = [{
+        'title' : u"灵川天气情况",
+        'description' : life_data,
+        'url':''
+        }]
+
+    wechat_custom.send_news(openid, content)
+

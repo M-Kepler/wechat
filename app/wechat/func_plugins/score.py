@@ -111,13 +111,12 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                 content = u''
                 score_info = []
                 for idx, tr in enumerate(soup.find_all('tr')[:-1]):
-                    #  XXX 这里是爬取全部在提取, 修改为直接爬取对应的数据
                     if idx != 0:
                         tds = tr.find_all('td')
                         term = tds[0].contents[0]
-                        lesson_name = tds[1].contents[0]
-                        score = tds[3].contents[0]
                         if term == school_term:
+                            lesson_name = tds[1].contents[0]
+                            score = tds[3].contents[0]
                             # 组装文本格式数据回复用户
                             content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (school_term, lesson_name, score)
                             # 组装数组格式的数据备用
@@ -125,7 +124,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
 
                 # 查询不到成绩
                 if not content:
-                    content = u'抱歉，没查询到结果\n可能还没公布成绩\n请稍候查询'
+                    content = u'抱歉，没查询到结果, 可能还没公布成绩\n请稍候查询'
                     wechat_custom.send_text(openid, content)
                 else:
                     url = current_app.config['HOST_URL'] + '/score-report/' + openid
