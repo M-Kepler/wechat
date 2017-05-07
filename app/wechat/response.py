@@ -119,11 +119,10 @@ def response_subscribe():
 def response_click():
     """ 回复菜单的点击事件 """
     commands= {
-            'music' : play_music,
+            'random_music' : play_random_music,
             'school_news' : school_news,
             'auth' : auth_url,
             'help' : all_command,
-            'music' : play_music,
             'score' : exam_grade,
             'weather': get_weather
             }
@@ -145,9 +144,19 @@ def command_not_found():
     """ 非关键字回复
     # TODO 后台转接客服
     """
-    content = app.config['COMMAND_NOT_FOUND'] + app.config['HELP_TEXT']
-    reply = create_reply(content, msg)
-    return reply.render()
+    if(msg.content.startswith("歌曲")):
+        music_title= msg.content.replace("歌曲", "")
+        if "" == music_title:
+            content = "搜索歌曲名称不能为空\n使用Tips：'歌曲'+'歌名'+'歌手'(如：歌曲遇见孙燕姿)"
+            reply = create_reply(content, msg)
+            return reply.render()
+        else:
+            play_music(music_title)
+        return 'success'
+    else:
+        content = app.config['COMMAND_NOT_FOUND'] + app.config['HELP_TEXT']
+        reply = create_reply(content, msg)
+        return reply.render()
 
 
 '''
@@ -187,8 +196,13 @@ def developing():
     return create_reply('该功能正在维护中...', msg).render()
 
 
-def play_music():
-    """随机播放音乐"""
+def play_music(music_title):
+    """ 搜索网易云音乐 """
+    music.query_music(openid, music_title)
+    return 'success'
+
+def play_random_music(openid):
+    """ 随机豆瓣FM音乐 """
     music.get_douban_fm(openid)
     return 'success'
 

@@ -149,6 +149,11 @@ jsapi_ticket是公众号用于调用微信JS接口的临时票据。正常情况
 [如何使用JSSDK](http://www.jianshu.com/p/bb88f7520b9e)<br />
 微信提供的面向网页开发者的基于微信内的网页开发工具包.
 
+* `MEDIA_ID`  
+公众号在回复图片, 语音, 视频的时候, 将使用`media_id`来调用相关文件
+ * 临时素材: 每个素材`media_id`会在开发者上传或粉丝发送到微信服务器3天后自动删除
+ * 永久素材:
+
 * 群发消息  
 首先讲图文消息用到的图片上传, 得到图片的url; 可以对某个分组的用户发消息; 可以查询群发状态
 
@@ -270,9 +275,9 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 可以进shell调试一下
 * score.py还没完善, 登录教务系统爬取成绩, 应该不难吧
 * auth.html里引用了很多js, 有一个是和后台view传数据的
-* `utils.py/init_wechat_sdk下获取access_token`那里出错
 * access_token的管理(获取和缓存和更新)
-* 客服接口
+* 素材管理
+ * 回复音乐消息显示错误: Error code: 40007, message: invalid media_id hint: [NtZ4DA0886ge25]
 
 
 ## FIXME
@@ -283,6 +288,7 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 
 
 ## XXX
+1. 客服接口
 
 
 ## DONE

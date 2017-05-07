@@ -39,6 +39,9 @@ class WechatConfig(Config):
     APPID = 'wx1638afb292624d0a'
     APPSECRET = '3436a11a7f5fd3d2c1225967e5aeb049'
     TOKEN = "kepler"
+
+    #  素材库图片ID
+    MUSIC_THUMB_MEDIA_ID = "bad_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro"
     EncodingAESKey = " "
 
     WELCOME_TEXT = "欢迎关注我的公众号.\n"
@@ -113,7 +116,7 @@ class WechatConfig(Config):
                     {
                         "type":"click",
                         "name":"随机音乐",
-                        "key" :"music"
+                        "key" :"random_music"
                     },
                     {
                         "type":"click",
