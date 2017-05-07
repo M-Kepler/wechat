@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# XXX
+# 爬虫 + API = 临时的方案
+# 后续修改一下, 用那个彩云的api
 
 from flask import current_app
 import hashlib
@@ -32,6 +35,13 @@ def get(openid):
     sugg_url = 'https://free-api.heweather.com/v5/suggestion?city=CN101300507&key=5c043b56de9f4371b0c7f8bee8f5b75e'
     # 天气图标
     photo_url = 'https://cdn.heweather.com/cond_icon/100.png'
+    #  彩云天气
+    caiyun_url ='http://www.caiyunapp.com/fcgi-bin/v1/api.py?lonlat=110.429369,25.310815&format=json&product=minutes_prec&token=96Ly7wgKGq6FhllM&random=0.8600497214532319'
+
+    #  彩云天气-降雨情况 -----------
+    caiyun_res = requests.get(caiyun_url)
+    caiyun_data = json.loads(caiyun_res.text)
+    rain_summary = caiyun_data['summary']
 
     #天气情况的内容提取------------开始
     weather_res = download(forecast_url)
@@ -43,10 +53,11 @@ def get(openid):
     txt_d = re.findall('txt_d":"(.*?)"', html)[0] #天气情况
     dir = re.findall('dir":"(.*?)"', html)[0]  # 风向
     sc = re.findall('sc":"(.*?)"', html)[0]  # 风力
-    wind = "%s  %s" %(sc, dir)
+    wind = "%s - %s" %(sc, dir)
 
 
-    weather_data = u"温度：%s℃ - %s℃   %s\n%s" % (min_tmp, max_tmp,txt_d, wind)
+    #  weather_data = u"温度：%s℃ - %s℃   %s  %s\n%s" % (min_tmp, max_tmp,txt_d, wind, rain_summary)
+    weather_data = u"温度：%s℃ - %s℃   %s  %s\n" % (min_tmp, max_tmp,txt_d, wind)
 
     #生活指数等内容的提取-----------开始
     life_res = download(sugg_url)
@@ -70,7 +81,7 @@ def get(openid):
     trav_txt = txt[6]
     trav = trav_brf + '\n' + trav_txt
 
-    life_data = weather_data + '\n\n' + u"舒适度：%s\n\n穿衣指数：%s\n\n感冒指数：%s\n\n出行指数：%s" % (comf, drsg, flu, trav)
+    life_data = weather_data + '\n' + u"舒适度：%s\n\n穿衣指数：%s\n\n出行指数：%s" % (comf, drsg, trav)
 
     #  life_data.append({
         #  "comf" : comf,
@@ -82,9 +93,9 @@ def get(openid):
         #  })
 
     content = [{
-        'title' : u"灵川天气情况",
+        'title' : rain_summary,
         'description' : life_data,
-        'url':''
+        'url':'http://www.caiyunapp.com/h5/?lonlat=110.411377,25.321474'
         }]
 
     wechat_custom.send_news(openid, content)

@@ -1,13 +1,14 @@
 # !/usr/bin/env python
 # _*_ coding:utf-8
 
-import requests
+import requests, json
 from flask import current_app
+import urllib.request
 from . import wechat_custom
 
-#  @celery.task
+
 def get_douban_fm(openid):
-    """抓取豆瓣FM"""
+    """ 随机豆瓣FM音乐 """
     url = 'https://douban.fm/j/v2/playlist?' + \
         'app_name=radio_website&version=100&channel=0&type=n'
     try:
@@ -26,3 +27,22 @@ def get_douban_fm(openid):
         wechat_custom.send_music(openid, music_url, thumb_media_id, title, desc)
 
 
+def get_netease_music(word):
+    """ 搜索网易云音乐 """
+    baseurl = r'http://s.music.163.com/search/get/?type=1&s='
+    qword = urllib.request.quote(word)
+    url = baseurl + qword + r'&limit=1&offset=0'
+    resp = urllib.request.urlopen(url)
+    music = json.loads(resp.read().decode())
+    return music
+
+
+def query_music(openid, music_title):
+    word = music_title 
+    music = get_netease_music(word)
+    title = music['result']['songs'][0]['name']
+    desc = '♫ 来自网易云音乐♫'
+    music_url = music['result']['songs'][0]['audio']
+    #  FIXME 直接回复图片是没问题的, 回复音乐就显示media_id错误
+    thumb_media_id = current_app.config["MUSIC_THUMB_MEDIA_ID"]
+    wechat_custom.send_image(openid, thumb_media_id)
