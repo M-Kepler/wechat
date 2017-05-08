@@ -1,4 +1,3 @@
-import pdb
 #!/usr/bin/env python
 # _*_ coding:utf-8
 
@@ -9,7 +8,6 @@ import pdb
 表名:列名    列值
 redis_prefix = "wechat:user:"
 redis_prefix + openid, 'nickname'
-
 """
 
 
@@ -24,7 +22,7 @@ from ..utils import init_wechat_sdk
 
 
 def set_user_info(openid):
-    """ 保存用户信息 DONE """
+    """ 保存用户信息 """
     redis_prefix = "wechat:user:"
     cache = redis.hexists(redis_prefix + openid, 'nickname')
     #  如果不存在缓存, 就从数据库中读取, 并更新缓存
@@ -69,7 +67,7 @@ def set_user_info(openid):
                 "regtime": user_info.regtime
                 })
 
-    #  存在缓存
+    #  存在信息缓存
     else:
         timeout = int(time.time()) - int(get_user_last_interact_time(openid))
         if timeout > 24 * 60 * 60:
@@ -252,3 +250,12 @@ def set_user_realname_and_classname(openid, realname, classname):
         })
 
 
+def set_user_group(openid, group_name):
+    """ 设置用户分组 """
+    wechat = init_wechat_sdk()
+    client = wechat['client']
+    user_group= client.group.get(openid)
+    if not user_group:
+        group = client.group.create(group_name)
+        group_id = group['group']['id']
+        client.group.move_user(openid, group_id)

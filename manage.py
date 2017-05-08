@@ -5,6 +5,7 @@ from flask_migrate import Migrate, MigrateCommand, upgrade
 from app import create_app, db
 from app.models import User, Role, Category, Post, Comment
 from app.wechat.models.user import WechatUser
+from app.wechat.utils import init_wechat_sdk
 from livereload import Server
 from werkzeug.security import generate_password_hash
 
@@ -12,6 +13,7 @@ app = create_app()
 manager = Manager(app)
 migrate = Migrate(app, db)
 manager.add_command('db', MigrateCommand)
+
 #  数据库更新迁移,就好像git一样做版本控制的
 
 #  也可以写带参数的脚本
@@ -24,12 +26,10 @@ def dev():
 #  进入shell调试的时候每次都要导入db,models太麻烦了,
 #  所以配置一下shell命令的上下文,就可以在shell里用了,不用每次都导入
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Post=Post,Comment=Comment, Category=Category,
-            WechatUser=WechatUser)
+    return dict(app=app, db=db, User=User, Role=Role, Post=Post, Comment=Comment, Category=Category,
+            WechatUser=WechatUser, init_wechat_sdk = init_wechat_sdk)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
-
-
 
 
 @manager.command

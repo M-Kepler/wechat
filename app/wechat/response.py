@@ -147,7 +147,7 @@ def command_not_found():
     if(msg.content.startswith("歌曲")):
         music_title= msg.content.replace("歌曲", "")
         if "" == music_title:
-            content = "搜索歌曲名称不能为空\n使用Tips：'歌曲'+'歌名'+'歌手'(如：歌曲遇见孙燕姿)"
+            content = "搜索歌曲名称不能为空\nTips：'歌曲'+'歌名'+'歌手'(如：歌曲遇见孙燕姿)"
             reply = create_reply(content, msg)
             return reply.render()
         else:

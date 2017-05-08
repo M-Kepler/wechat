@@ -10,7 +10,7 @@ import time
 from flask import current_app
 from app import redis
 from bs4 import BeautifulSoup, SoupStrainer
-from ..models import set_user_student_info, set_user_realname_and_classname
+from ..models import set_user_student_info, set_user_realname_and_classname, set_user_group
 from ..utils import AESCipher, init_wechat_sdk
 from . import wechat_custom
 from wechatpy import parse_message, create_reply, events
@@ -106,6 +106,8 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     #  school_term = items[4][3:]
                     school_term = '2016-2017_2'
                     set_user_realname_and_classname(openid, realname, classname)
+                    #  默认根据班级分组
+                    set_user_group(openid, classname)
 
                 # 提取当前学期的成绩
                 content = u''
