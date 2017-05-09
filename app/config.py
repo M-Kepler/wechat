@@ -41,7 +41,7 @@ class WechatConfig(Config):
     TOKEN = "kepler"
 
     #  素材库图片ID
-    MUSIC_THUMB_MEDIA_ID = "bad_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro"
+    MUSIC_THUMB_MEDIA_ID = "d_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro"
     EncodingAESKey = " "
 
     WELCOME_TEXT = "欢迎关注我的公众号.\n"
