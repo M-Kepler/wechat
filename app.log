@@ -9,3 +9,4 @@
 2017-05-08 16:54:01,096 WARNING: 获取用户信息出错, 错误信息:{'openid': 'oApGExFBMSuX7JogXTMYdj9SGlyg', 'tagid_list': [], 'subscribe': 0}[in /media/kepler/Share/workspaces/wechat/app/wechat/models/__init__.py:40]
 2017-05-08 20:17:08,721 WARNING: 获取用户信息出错, 错误信息:{'tagid_list': [], 'openid': 'oApGExFBMSuX7JogXTMYdj9SGlyg', 'subscribe': 0}[in /media/kepler/Share/workspaces/wechat/app/wechat/models/__init__.py:40]
 2017-05-08 20:20:06,757 WARNING: 获取用户信息出错, 错误信息:{'tagid_list': [], 'openid': 'oApGExFBMSuX7JogXTMYdj9SGlyg', 'subscribe': 0}[in /media/kepler/Share/workspaces/wechat/app/wechat/models/__init__.py:40]
+2017-05-09 17:34:09,317 WARNING: 获取用户信息出错, 错误信息:{'tagid_list': [], 'subscribe': 0, 'openid': 'oApGExFBMSuX7JogXTMYdj9SGlyg'}[in /media/kepler/Share/workspaces/wechat/app/wechat/models/__init__.py:40]

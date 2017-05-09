@@ -57,7 +57,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         if not res:
             if check_login:
                 errmsg = u"教务系统连接超时，请稍后重试"
-                redis.set(redis_auth_prefix + openid, errmsg, 10)
+                redis.set(redis_auth_prefix + openid, errmsg, 20)
             else:
                 content = u"教务系统连接超时\n\n请稍后重试"
                 wechat_custom.send_text(openid, content)
@@ -66,7 +66,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
         elif res.status_code == 200 and 'alert' in res.text:
             if check_login:
                 errmsg = u"用户名或密码不正确"
-                redis.set(redis_auth_prefix + openid, errmsg, 10)
+                redis.set(redis_auth_prefix + openid, errmsg, 20)
             else:
                 url = current_app.config['HOST_URL'] + '/auth-score/' + openid
                 content = u'用户名或密码不正确\n\n' +\
@@ -86,7 +86,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     e, score_url))
                 if check_login:
                     errmsg = u"教务系统连接超时，请稍后重试"
-                    redis.set(redis_auth_prefix + openid, errmsg, 10)
+                    redis.set(redis_auth_prefix + openid, errmsg, 20)
                 else:
                     content = u"学校的教务系统连接超时\n\n请稍后重试"
                     wechat_custom.send_text(openid, content)
@@ -154,7 +154,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     cipher = AESCipher(current_app.config['PASSWORD_SECRET_KEY'])
                     studentpwd = cipher.encrypt(studentpwd)
                     set_user_student_info(openid, studentid, studentpwd)
-                    redis.set(redis_auth_prefix + openid, 'ok', 10)
+                    redis.set(redis_auth_prefix + openid, 'ok', 20)
 
 
 def login(studentid, studentpwd, url, session, proxy):

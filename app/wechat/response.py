@@ -9,7 +9,7 @@ from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
 from wechatpy.replies import TransferCustomerServiceReply
 from flask import current_app as app
-from .func_plugins import wechat_custom, music, score, weather
+from .func_plugins import wechat_custom, music, score, weather, school_news
 from .models import set_user_info, get_user_student_info
 from .func_plugins.state import get_user_last_interact_time, set_user_last_interact_time
 from .utils import AESCipher, init_wechat_sdk
@@ -73,10 +73,11 @@ def response_text():
     根据用户发的文字调用特定的功能
     """
     commands= {
-        u'^绑定':auth_url,
+        u'^绑定': auth_url,
         u'^天气': get_weather,
-        u'^更新菜单':update_menu_setting,
-        u'\?|^？|^help|^帮助':all_command
+        u'^新闻': get_school_news,
+        u'^更新菜单': update_menu_setting,
+        u'\?|^？|^help|^帮助': all_command
             }
     #  匹配指令
     command_match = False
@@ -207,9 +208,10 @@ def play_random_music(openid):
     return 'success'
 
 
-def school_news():
-    """学校新闻 """
-    return create_reply('这将是学校新闻的回复', msg).render()
+def get_school_news():
+    """ 学校新闻 """
+    school_news.get(openid)
+    return 'success'
 
 
 def get_weather():
