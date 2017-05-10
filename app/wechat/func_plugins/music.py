@@ -24,7 +24,8 @@ def get_douban_fm(openid):
     else:
         # 客服接口推送音乐必须要有 thumb_media_id
         thumb_media_id = current_app.config["MUSIC_THUMB_MEDIA_ID"]
-        wechat_custom.send_music(openid, music_url, thumb_media_id, title, desc)
+        #  wechat_custom.send_music(openid, music_url, thumb_media_id, title, desc)
+        wechat_custom.send_music_self(openid,title, desc, music_url, thumb_media_id)
 
 
 def get_netease_music(word):
@@ -38,11 +39,12 @@ def get_netease_music(word):
 
 
 def query_music(openid, music_title):
-    word = music_title 
+    word = music_title
     music = get_netease_music(word)
     title = music['result']['songs'][0]['name']
     desc = '♫ 来自网易云音乐♫'
     music_url = music['result']['songs'][0]['audio']
-    #  FIXME 直接回复图片是没问题的, 回复音乐就显示media_id错误
     thumb_media_id = current_app.config["MUSIC_THUMB_MEDIA_ID"]
-    wechat_custom.send_image(openid, thumb_media_id)
+    #  wechat_custom.send_music(openid, music_url, thumb_media_id, title, desc)
+    wechat_custom.send_music_self(openid,title, desc, music_url, thumb_media_id)
+

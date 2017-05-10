@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# XXX
-# 爬虫 + API = 临时的方案
-# 后续修改一下, 用那个彩云的api
+#  !/usr/bin/env python
+#  -*- coding: utf-8 -*-
+#  XXX  爬虫 + API = 临时的方案
+#  后续修改一下, 就用那个彩云的api
 
 from flask import current_app
 import hashlib
@@ -55,8 +54,6 @@ def get(openid):
     sc = re.findall('sc":"(.*?)"', html)[0]  # 风力
     wind = "%s - %s" %(sc, dir)
 
-
-    #  weather_data = u"温度：%s℃ - %s℃   %s  %s\n%s" % (min_tmp, max_tmp,txt_d, wind, rain_summary)
     weather_data = u"温度：%s℃ - %s℃   %s  %s\n" % (min_tmp, max_tmp,txt_d, wind)
 
     #生活指数等内容的提取-----------开始
@@ -82,15 +79,6 @@ def get(openid):
     trav = trav_brf + '\n' + trav_txt
 
     life_data = weather_data + '\n' + u"舒适度：%s\n\n穿衣指数：%s\n\n出行指数：%s" % (comf, drsg, trav)
-
-    #  life_data.append({
-        #  "comf" : comf,
-        #  "drsg" : drsg,
-        #  "flu" : flu,
-        #  "sport" : sport,
-        #  "trav" : trav,
-        #  "uv" : uv
-        #  })
 
     content = [{
         'title' : rain_summary,

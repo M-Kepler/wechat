@@ -28,13 +28,14 @@ def get(openid):
             wechat_custom.send_text(openid, content)
         else:
             soup = BeautifulSoup(res.text, "html.parser")
-            rows = soup.find("tr", {"class":"newsMoreLine"}).find_all('a')[:7]  # 图文推送5数
+            rows = soup.find("tr", {"class":"newsMoreLine"}).find_all('a')[:5]  # 图文推送5数
             content = []
             for row in rows:
                 title = row.text
                 link = urljoin(url, row['href'])
                 data = {
                     "title": title,
+                    "picurl":'http://d.hiphotos.baidu.com/baike/w%3D268%3Bg%3D0/sign=22959be8277f9e2f70351a0e270b8e19/35a85edf8db1cb13ca4a151ddd54564e92584b98.jpg',
                     "description":"",
                     "url": link
                 }

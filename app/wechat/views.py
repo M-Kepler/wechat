@@ -62,7 +62,8 @@ def auth_score_result(openid=None):
     """ 查询学号绑定结果 """
     if is_user_exists(openid):
         redis_prefix = 'wechat:user:auth:score:'
-        errmsg = redis.get(redis_prefix + openid)
+        errmsg_cache = redis.get(redis_prefix + openid)
+        errmsg = errmsg_cache.decode()
         if errmsg:
             redis.delete(redis_prefix + openid)
             return jsonify({'errmsg' : errmsg})

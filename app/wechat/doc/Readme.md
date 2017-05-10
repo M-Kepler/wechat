@@ -266,7 +266,7 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 
 ## UI 和文章排版
 
-* 方倍工作室有个图文编辑器,写好后直接复制(html5)过去就行了
+* 方倍工作室有个图文编辑器,写好后直接复制过去应该行了
 
 
 # 清单
@@ -298,4 +298,18 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 1. 搬运下来的
 * score.py还没完善, 登录教务系统爬取成绩, 应该不难吧
 * auth.html里引用了很多js, 有一个是和后台view传数据的
+* 一定要注意, 从redis获取到values后一定要decode()一下, 因为直接从redis获取到的是b'content',要decode一下才能变成你想要的str
+
+
+
+
+
+
+***
+f = open('/home/kepler/Pictures/1.jpeg','rb')
+<!-- 上传图文消息中需要用到的图片, 得到pic_url -->
+client.media.upload_mass_image(f)
+
+<!-- 上传到素材库,区别在于上面这个就是上面那个不占素材哭条数 -->
+client.material.add('image',f)
 

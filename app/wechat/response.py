@@ -5,6 +5,7 @@
 
 
 import re
+from .models.auth import Auth
 from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
 from wechatpy.replies import TransferCustomerServiceReply
@@ -121,7 +122,7 @@ def response_click():
     """ 回复菜单的点击事件 """
     commands= {
             'random_music' : play_random_music,
-            'school_news' : school_news,
+            'school_news' : get_school_news,
             'auth' : auth_url,
             'help' : all_command,
             'score' : exam_grade,
@@ -133,12 +134,18 @@ def response_click():
 
 def auth_url():
     """ 教务系统\图书馆绑定的url """
-    #  组装url
-    jw_url = app.config['HOST_URL'] + '/auth-score/' + openid
-    library_url = app.config['HOST_URL'] + '/auth-library/' + openid
-    content = app.config['AUTH_TEXT'] % (jw_url, library_url)
-    reply = create_reply(content, msg)
-    return reply.render()
+    auth_info = Auth.query.filter_by(openid=openid).first()
+    if not auth_info:
+        #  组装url
+        jw_url = app.config['HOST_URL'] + '/auth-score/' + openid
+        library_url = app.config['HOST_URL'] + '/auth-library/' + openid
+        content = app.config['AUTH_TEXT'] % (jw_url, library_url)
+        reply = create_reply(content, msg)
+        return reply.render()
+    else:
+        reply = create_reply('你已完成绑定！', msg)
+        return reply.render()
+
 
 
 def command_not_found():

@@ -110,18 +110,22 @@ def update_wechat_token():
     """ 刷新access_token 和 jsapi_ticket
     """
     wechat = init_wechat_sdk()
-    access_token = wechat['access_token']
-    token_expires_at=wechat['access_token_expires_at']
+    wechat_client = wechat['client']
+    access_token_dic = wechat_client.fetch_access_token()
+    access_token = access_token_dic['access_token']
+    token_expires_at = access_token_dic['expires_in']
 
     redis.set("wechat:access_token", access_token, 7000)
     redis.set("wechat:access_token_expires_at", token_expires_at, 7000)
 
-    jsapi_ticket = wechat['jsapi_ticket']
-    ticket_expires_at=wechat['jsapi_ticket_expires_at']
+    jsapi_ticket_dic = wechat_client.jsapi.get_ticket()
+    jsapi_ticket = jsapi_ticket_dic['ticket']
+    ticket_expires_at = jsapi_ticket_dic['expires_in']
+
     redis.set("wechat:jsapi_ticket", jsapi_ticket, 7000)
     redis.set("wechat:jsapi_ticket_expires_at", ticket_expires_at, 7000)
 
-    current_app.logger.warning("运行update_wechat_token结束,将重新发送")
+    current_app.logger.warning("运行update_wechat_token结束")
 
 
 def get_wechat_access_token():
