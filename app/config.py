@@ -48,7 +48,7 @@ class WechatConfig(Config):
     WELCOME_TEXT = "欢迎关注我的公众号.\n"
     HOST_URL = "http://huangjinjie.ngrok.cc/wechat"
 
-    COMMAND_TEXT = "您可以回复以下关键字:\n---------------\n天气  新闻  音乐\n测试4  测试5  测试6"
+    COMMAND_TEXT = "您可以回复以下关键字:\n---------------\n天气  新闻  歌曲\n测试4  测试5  测试6"
     COMMAND_NOT_FOUND = "\n后台已收到您的留言!"
     HELP_TEXT = u"\n\n回复' ? '查看帮助信息\n"
     BAIDU_ANALYTICS = ""

@@ -209,7 +209,7 @@ def play_music(music_title):
     music.query_music(openid, music_title)
     return 'success'
 
-def play_random_music(openid):
+def play_random_music():
     """ 随机豆瓣FM音乐 """
     music.get_douban_fm(openid)
     return 'success'

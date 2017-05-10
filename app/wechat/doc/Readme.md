@@ -1,5 +1,33 @@
 [TOC]
 
+<!-- vim-markdown-toc GFM -->
+* [任务报告](#任务报告)
+    * [题目要求](#题目要求)
+    * [任务书](#任务书)
+    * [模块](#模块)
+* [设计](#设计)
+    * [搭建本地测试环境](#搭建本地测试环境)
+    * [项目目录结构](#项目目录结构)
+    * [微信和 wechatpy](#微信和-wechatpy)
+        * [微信需知](#微信需知)
+        * [未认证不可用接口](#未认证不可用接口)
+        * [wechatpy需知](#wechatpy需知)
+    * [数据库 redis 和 mysql](#数据库-redis-和-mysql)
+        * [Redis 数据库](#redis-数据库)
+        * [Redis 和 mysql](#redis-和-mysql)
+    * [Flask](#flask)
+        * [拾遗](#拾遗)
+        * [请求,应答,会话](#请求应答会话)
+        * [蓝图](#蓝图)
+* [过程](#过程)
+    * [UI 和文章排版](#ui-和文章排版)
+* [清单](#清单)
+    * [TODO](#todo)
+    * [FIXME](#fixme)
+    * [DONE](#done)
+    * [XXX](#xxx)
+
+<!-- vim-markdown-toc -->
 
 # 任务报告
 
@@ -271,7 +299,9 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 
 # 清单
 
+
 ## TODO
+
 1. 未完成
 * 多客服那里需要获取和更新access_token,jsapi_ticket, 现在无法验证正确性, 或许
 可以进shell调试一下
@@ -288,24 +318,23 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 `redis_auth_prefix = "wechat:user:auth:score:"`
 
 
-
-## XXX
-1. 有待商榷
-* access_token的管理(获取和缓存和更新), 我好像是用了wechatpy自带的缓存管理<有待商榷>
-
-
 ## DONE
+
 1. 搬运下来的
 * score.py还没完善, 登录教务系统爬取成绩, 应该不难吧
 * auth.html里引用了很多js, 有一个是和后台view传数据的
-* 一定要注意, 从redis获取到values后一定要decode()一下, 因为直接从redis获取到的是b'content',要decode一下才能变成你想要的str
+* 一定要注意, 从redis获取出来values后一定要decode()一下, 因为直接从redis获取到的是b'content',要decode一下才能变成你想要的str
+* access_token的管理(获取和缓存和更新), 我好像是用了wechatpy自带的缓存管理<有待商榷>
 
 
+## XXX
 
-
+1. 有待商榷的写法
+* `response`下的按照dict来选择对应的处理函数
 
 
 ***
+
 f = open('/home/kepler/Pictures/1.jpeg','rb')
 <!-- 上传图文消息中需要用到的图片, 得到pic_url -->
 client.media.upload_mass_image(f)
