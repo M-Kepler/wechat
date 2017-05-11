@@ -168,10 +168,15 @@ jsapi_ticket是公众号用于调用微信JS接口的临时票据。正常情况
 非常有限，频繁刷新jsapi_ticket会导致api调用受限，影响自身业务，开发者必须在
 自己的服务全局缓存jsapi_ticket 。
 
-* 获取网页授权```OAuth2.0```  
+* [获取网页授权](http://www.cnblogs.com/txw1958/p/weixin71-oauth20.html)```OAuth2.0```  
 [理解OAuth2.0](http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html)<br/>
 允许用户将第三方应用以安全且标准的方式获取该用户在某一个网站上存储的秘密资源, 而无需将用户名和密码提供给第
 三方应用, ```OAuth```提供一个令牌,授权一个特定的网站在特定时间内访问特定资源.
+> 1. 用户统一授权,获取code(code只能用一次,5分钟内没用就自动过期)
+> 2. 通过code换取网页授权access_token
+> 3. 刷新access_token(如果有需要)
+> 4. 拉取用户信息(需scope为snsapi_userinfo)
+
 
 * 微信```JsSDK```  
 [如何使用JSSDK](http://www.jianshu.com/p/bb88f7520b9e)<br />
@@ -303,13 +308,13 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 ## TODO
 
 1. 未完成
+* [用户对消息的接受设置] 初步方案:User表增加个字段'subscribe_tag'保存用户选择的分类,比如'就业信息'
+  发消息的时候先去看看用户的这个字段,如有'就业信息',才把这个openid加入到发送的用户列表
+  [见wechatpy/message/send_mass_text](http://docs.wechatpy.org/zh_CN/master/_modules/wechatpy/client/api/message.html)
+
+
 * 多客服那里需要获取和更新access_token,jsapi_ticket, 现在无法验证正确性, 或许
 可以进shell调试一下
-* 素材管理
- * 回复音乐消息显示错误: Error code: 40007, message: invalid media_id hint: [NtZ4DA0886ge25]
-* 发布图文消息需要传入的参数是(标题, 文章描述,缩略图,url)那么当用户单击这个图文消息后是弹出网页吗?还是
-怎么回事?我看别人发的图文消息, 点击后的链接都是微信那边的, 有些是一个自己域名下的url, 所以这个怎么回事
-* 有时候打开自己开发的网页页面时很慢比如绑定页面, 其原因估计是因为ngrok
 
 
 ## FIXME
@@ -325,6 +330,17 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 * auth.html里引用了很多js, 有一个是和后台view传数据的
 * 一定要注意, 从redis获取出来values后一定要decode()一下, 因为直接从redis获取到的是b'content',要decode一下才能变成你想要的str
 * access_token的管理(获取和缓存和更新), 我好像是用了wechatpy自带的缓存管理<有待商榷>
+* 发布图文消息需要传入的参数是(标题, 文章描述,缩略图,url)那么当用户单击这个图文消息后是弹出网页吗?还是
+怎么回事?我看别人发的图文消息, 点击后的链接都是微信那边的, 有些是一个自己域名下的url, 所以这个怎么回事
+ * 永久素材上传到了微信的服务器,所以最后显示的是微信那边的url
+* 回复音乐消息显示错误: Error code: 40007, message: invalid media_id hint: [NtZ4DA0886ge25]
+ * 自己按照官网的说明写了个发送音乐消息的函数,调用成功
+ 
+* 有时候打开自己开发的网页页面时很慢比如绑定页面, 其原因估计是因为ngrok
+
+* OAuth,[code失效的问题,就是这个原因](http://tieba.baidu.com/p/5032467480)
+ * ["errcode":40163](http://www.imooc.com/qadetail/207788)
+ * [用session保存必要信息,避免多次请求code](https://segmentfault.com/q/1010000008778286/a-1020000008779944)
 
 
 ## XXX

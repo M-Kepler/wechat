@@ -39,6 +39,8 @@ class WechatConfig(Config):
     APPID = 'wx1638afb292624d0a'
     APPSECRET = '3436a11a7f5fd3d2c1225967e5aeb049'
     TOKEN = "kepler"
+    REDIRECT_URI = 'http://huangjinjie.ngrok.cc/wechat/setting'
+    #  REDIRECT_URI = 'http://huangjinjie.ngrok.cc'
 
     #  素材库图片ID
     MUSIC_THUMB_MEDIA_ID='bad_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro'
@@ -92,6 +94,11 @@ class WechatConfig(Config):
                         "type" : "click",
                         "name" : "期末成绩",
                         "key" : "score"
+                    },
+                    {
+                        "type" : "click",
+                        "name" : "消息设置",
+                        "key" : "setting"
                     }
                 ]
             },

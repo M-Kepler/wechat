@@ -4,7 +4,7 @@ from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from . import wechat
 from app import redis
-from .utils import check_wechat_signature, get_jsapi_signature_data
+from .utils import check_wechat_signature, get_jsapi_signature_data, oauth_request
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
@@ -129,6 +129,12 @@ def auth_library_result(openid=None):
             abort(404)
     else:
         abort(404)
+
+
+@wechat.route('/setting', methods=['GET'])
+def setting(openid=None):
+    return render_template('wechat/setting.html')
+
 
 
 @wechat.errorhandler(404)

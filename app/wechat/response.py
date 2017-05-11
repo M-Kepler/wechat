@@ -126,7 +126,8 @@ def response_click():
             'auth' : auth_url,
             'help' : all_command,
             'score' : exam_grade,
-            'weather': get_weather
+            'weather': get_weather,
+            'setting':setting
             }
     response = commands[msg.key]()
     return response
@@ -225,6 +226,15 @@ def get_weather():
     """ 获取天气信息 """
     weather.get(openid)
     return 'success'
+
+
+def setting():
+    """ TODO 设置公众号的订阅消息
+    """
+    content = app.config['HOST_URL'] + '/setting'
+    reply = create_reply(content, msg)
+    return reply.render()
+
 
 
 def exam_grade():

@@ -10,6 +10,7 @@ from wechatpy.replies import ImageReply
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy import WeChatClient
+from wechatpy.oauth import WeChatOAuth
 from Crypto import Random
 from Crypto.Cipher import AES
 import time, random, string, base64
@@ -89,19 +90,26 @@ def oauth_request(func):
     """ OAuth网页授权接入装饰器 """
     @wraps(func)
     def decorated_func(*args, **kwargs):
+        scope = 'snsapi_userinfo'
         code = request.args.get('code', None)
-        wechat_client = WeChatClient(current_app.config['APPID'],current_app.config['APPSECRET'])
-        url = wechat_client.oauth.authorize_url(request.url)
+        redirect_uri = current_app.config['REDIRECT_URI']
+        wechat_oauth = WeChatOAuth(current_app.config['APPID'], current_app.config['APPSECRET'], redirect_uri, scope)
+        url = wechat_oauth.authorize_url
+        #  FIXME  第二次用code, 也可能是因为我的域名没有备案的问题详见Readme.md/todo, 错误14603
         if code:
+            current_app.logger.warning('code:' + code)
             try:
-                user_info = wechat_client.oauth.get_user_info(code)
+                user_access_token = wechat_oauth.fetch_access_token(code)
+                user_info = wechat_oauth.get_user_info()
             except Exception as e:
-                print (e.errmsg, e.errcode)
+                current_app.logger.warning('%s, %s, 可能是code被用了两次') % (e.errmsg, e.errcode)
                 abort(403)
             else:
-                session['user_info'] = user_info
+                current_app.logger.warning('user_info:' + str(user_info))
+                #  session['user_info'] = user_info
         else:
             return redirect(url)
+
         return decorated_func(*args, **kwargs)
     return decorated_func
 
