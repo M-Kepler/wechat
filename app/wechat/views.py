@@ -4,7 +4,7 @@ from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from . import wechat
 from app import redis
-from .utils import check_wechat_signature, get_jsapi_signature_data, oauth_request
+from .utils import check_wechat_signature, get_jsapi_signature_data, oauth_request, openid_list
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
@@ -131,10 +131,24 @@ def auth_library_result(openid=None):
         abort(404)
 
 
-@wechat.route('/setting', methods=['GET'])
+#  @oauth_request
+#  不用oauth授权的话, 只能传openid参数了
+@wechat.route('/setting/<openid>', methods=['GET', 'POST'])
 def setting(openid=None):
-    return render_template('wechat/setting.html')
+    if request.method == 'POST':
+        #TODO  这个openid_list的值只能设置一次,这里每更改一次这个list都会更改,看看人家怎么实现的
+        values = request.form.getlist('check')
+        aaaa = openid_list(openid, values)
+        print(aaaa)
+        return 'success'
+    else:
+        return render_template('wechat/setting.html')
 
+
+@wechat.route('/phonenumber', methods=['GET'])
+def phone_number():
+    """ 回复常用电话 """
+    return render_template('wechat/phone_number.html')
 
 
 @wechat.errorhandler(404)

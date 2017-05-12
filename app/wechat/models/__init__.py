@@ -28,7 +28,7 @@ def set_user_info(openid):
     #  如果不存在缓存, 就从数据库中读取, 并更新缓存
     if not cache:
         user_info = WechatUser.query.filter_by(openid=openid).first()
-        #  用户不在缓存也在数据库中也找不到, 将用户信息插入数据库
+        #  用户不在缓存也在数据库中也找不到, 将从'微信'得到的用户信息插入数据库
         if not user_info:
             try:
                 wechat = init_wechat_sdk()

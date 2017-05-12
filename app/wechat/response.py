@@ -6,6 +6,7 @@
 
 import re
 from .models.auth import Auth
+from .models.user import WechatUser
 from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
 from wechatpy.replies import TransferCustomerServiceReply
@@ -96,7 +97,7 @@ def response_text():
 def response_location():
     location_x = msg.location_x
     location_y = msg.location_y
-    get_weather(openid, location_x, location_y)
+    #  get_weather(openid, location_x, location_y)
     return create_reply('收到位置信息，经度%s, 纬度%s ' % (location_x, location_y), msg).render()
 
 
@@ -126,8 +127,8 @@ def response_click():
             'auth' : auth_url,
             'help' : all_command,
             'score' : exam_grade,
-            'weather': get_weather,
-            'setting':setting
+            'setting' : setting,
+            'weather': get_weather
             }
     response = commands[msg.key]()
     return response
@@ -136,15 +137,19 @@ def response_click():
 def auth_url():
     """ 教务系统\图书馆绑定的url """
     auth_info = Auth.query.filter_by(openid=openid).first()
+    user_info = WechatUser.query.filter_by(openid=openid).first()
     if not auth_info:
         #  组装url
         jw_url = app.config['HOST_URL'] + '/auth-score/' + openid
         library_url = app.config['HOST_URL'] + '/auth-library/' + openid
-        content = app.config['AUTH_TEXT'] % (jw_url, library_url)
+        content = app.config['AUTH_TEXT'] % (jw_url)
         reply = create_reply(content, msg)
         return reply.render()
     else:
-        reply = create_reply('你已完成绑定！', msg)
+        #  FIXME 返回个人信息
+        #  解析13003601插入个人信息表
+        reply = create_reply('已绑定学号：%s！\n姓名：%s\n班级：%s' % (auth_info.studentid, user_info.realname,
+            user_info.classname), msg)
         return reply.render()
 
 
@@ -229,12 +234,11 @@ def get_weather():
 
 
 def setting():
-    """ TODO 设置公众号的订阅消息
-    """
-    content = app.config['HOST_URL'] + '/setting'
+    """ 自定义订阅消息类型 """
+    setting_url = app.config['HOST_URL'] + '/setting/' + openid
+    content = '<a href = "%s">［公众号消息设置］</a>' % setting_url
     reply = create_reply(content, msg)
     return reply.render()
-
 
 
 def exam_grade():
@@ -252,4 +256,5 @@ def exam_grade():
         content = app.config['AUTH_JW_TEXT'] % url
         reply = create_reply(content, msg)
         return reply.render()
+
 

@@ -102,7 +102,7 @@ def oauth_request(func):
                 user_access_token = wechat_oauth.fetch_access_token(code)
                 user_info = wechat_oauth.get_user_info()
             except Exception as e:
-                current_app.logger.warning('%s, %s, 可能是code被用了两次') % (e.errmsg, e.errcode)
+                print(e.errmsg, e.errcode)
                 abort(403)
             else:
                 current_app.logger.warning('user_info:' + str(user_info))
@@ -115,8 +115,7 @@ def oauth_request(func):
 
 
 def update_wechat_token():
-    """ 刷新access_token 和 jsapi_ticket
-    """
+    """ 刷新access_token 和 jsapi_ticket """
     wechat = init_wechat_sdk()
     wechat_client = wechat['client']
     access_token_dic = wechat_client.fetch_access_token()
@@ -161,6 +160,29 @@ def get_jsapi_signature_data(url):
         "nonceStr" : noncestr,
         "signature" : signature
     }
+
+
+academy_list = []
+interview_list = []
+report_list = []
+def openid_list(openid, values):
+    """ FIXME 根据用户的设置把用户放到对应的发送列表里
+    应该吧这些选择保存到数据库中
+    """
+
+    send_list = {
+            'academy_list':academy_list,
+            'interview_list':interview_list,
+            'report_list':report_list
+            }
+    for value in values:
+        if value == 'academy':
+            academy_list.append(openid)
+        elif value == 'interview':
+            interview_list.append(openid)
+        elif value == 'report':
+            report_list.append(openid)
+    return send_list
 
 
 def generate_random_str(N):

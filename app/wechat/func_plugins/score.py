@@ -104,6 +104,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     realname = items[1][3:]
                     classname = items[2][3:]
                     #  school_term = items[4][3:]
+                    #  TODO 最后的时候把这个改回来
                     school_term = '2016-2017_2'
                     set_user_realname_and_classname(openid, realname, classname)
                     #  默认根据班级分组
@@ -120,7 +121,8 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                             lesson_name = tds[1].contents[0]
                             score = tds[3].contents[0]
                             # 组装文本格式数据回复用户
-                            content = content + u'\n\n学期：%s\n课程名称：%s\n考试成绩：%s' % (school_term, lesson_name, score)
+                            content = content + u'课程名称：%s\n考试成绩：%s\n\n' % (
+                                    lesson_name, score)
                             # 组装数组格式的数据备用
                             score_info.append({"term":term, "lesson_name": lesson_name, "score": score})
 
@@ -131,10 +133,18 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                 else:
                     url = current_app.config['HOST_URL'] + '/score-report/' + openid
                     data = [{
-                        'title': u'%s - %s学期成绩' % (realname, school_term),
+                        'title': u'%s - %s学期成绩 ' % (realname, school_term),
                         'description':'',
                         'url':url
-                    }]
+                    }, {
+                        'title':content,
+                        'description':'',
+                        'url':url
+                    }, {
+                        'title':'点击这里分享',
+                        'description':'',
+                        'url':url
+                    } ]
 
                     # 缓存结果 1 小时
                     redis.set(redis_prefix + openid, data, 3600)

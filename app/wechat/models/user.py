@@ -21,8 +21,6 @@ class WechatUser(db.Model):
     headimgurl = db.Column(db.String(150), nullable=True)
     regtime = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    # TODO 我要对用户进行分组, 好像微信提供了分组的接口, 所以我还用写role表吗?
-    #  role_id = db.Column(db.Integer)
     #  phone_number = db.Column(db.String(32), nullable=True)
     #  eamil = db.Column(db.String(32), nullable=True)
 

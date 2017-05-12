@@ -60,7 +60,8 @@ class WechatConfig(Config):
     #  绑定认证URL
     AUTH_JW_TEXT = '\n<a href = "%s">［未绑定？点击这里绑定学号］</a>\n'
     AUTH_LIBRARY_TEXT = '\n<a href = "%s">［未来绑定？点击这里绑定图书馆帐号］</a>\n'
-    AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n\n<a href="%s">绑定图书馆帐号</a>\n'
+    #  AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n\n<a href="%s">绑定图书馆帐号</a>\n'
+    AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n'
 
     JW_LOGIN_URL = "http://bkjw2.guet.edu.cn/student/public/login.asp"
     JW_SCORE_URL = "http://bkjw2.guet.edu.cn/student/Score.asp"
@@ -82,12 +83,12 @@ class WechatConfig(Config):
                     },
                     {
                         "type" : "click",
-                        "name" : "帮助",
+                        "name" : "使用帮助",
                         "key" : "help"
                     },
                     {
                         "type" : "click",
-                        "name" : "绑定",
+                        "name" : "绑定信息",
                         "key" : "auth"
                     },
                     {
@@ -104,7 +105,7 @@ class WechatConfig(Config):
             },
 
             {
-                "name" : "菜单二",
+                "name" : "校园直达",
                 "sub_button" : [
                     {
                         "type" : "click",
@@ -115,6 +116,11 @@ class WechatConfig(Config):
                         "type":"view",
                         "name":"视频",
                         "url":'http://v.qq.com/'
+                    },
+                    {
+                        "type" : "view",
+                        "name" : "常用电话",
+                        "url" : HOST_URL + '/phonenumber'
                     }
                 ]
             },
@@ -131,21 +137,6 @@ class WechatConfig(Config):
                         "type":"click",
                         "name":"天气预报",
                         "key" :"weather"
-                    },
-                    {
-                        "type":"click",
-                        "name":"点击事件3",
-                        "key" :"test3"
-                    },
-                    {
-                        "type":"click",
-                        "name":"点击事件4",
-                        "key" :"test4"
-                    },
-                    {
-                        "type":"click",
-                        "name":"点击事件5",
-                        "key" :"test5"
                     }
                 ]
             }

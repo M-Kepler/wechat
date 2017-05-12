@@ -1,104 +1,84 @@
 <!DOCTYPE html>
 <html class="ie"><!--<![endif]-->
-	<head>
-		<meta charset="utf-8">
-		<title>公众号设置</title>
-		<meta name="viewport" content="width=320.1,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-
+  <head>
+    <meta charset="utf-8">
+    <title>公众号设置</title>
+    <meta name="viewport" content="width=320.1,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
     <link href = "http://cdn.bootcss.com/weui/1.1.2/style/weui.css" rel = "stylesheet">
     <link rel="stylesheet" href="http://gxgk-wechat.b0.upaiyun.com/styles/weui.min.css" />
     <link rel="stylesheet" href="http://gxgk-wechat.b0.upaiyun.com/styles/score.min.css" />
+    <script src = "http://cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
 
-	</head>
+  </head>
 
-	<body onselectstart="return false">
-		<div class= "container js_contarner">
-			<div class="hd">
-				<h1 class= "page_title">公众号设置</h1>
-			</div>
+  <body onselectstart="return false">
+    <div class= "container js_contarner">
+      <div class="hd">
+        <h1 class= "page_title">公众号设置</h1>
+      </div>
 
-			<div class="weui_cells_title">消息推送设置</div>
-
-			<input hidden="hidden" id="btn" name="btn1" type="radio" value="off" checked="checked" />
-
-			<div class="weui-cells weui-cells_form">
-
-				<div class="weui-cell weui-cell_switch">
-					<div class="weui-cell__bd">学院通知</div>
-					<div class="weui-cell__ft">
-						<input class="weui-switch" type="checkbox" id="button1" name="button1"/>
-					</div>
-				</div>
+      <div class="weui_cells_title">消息推送设置</div>
 
 
-				<div class="weui-cell weui-cell_switch">
-					<div class="weui-cell__bd">就业信息</div>
-					<div class="weui-cell__ft">
-						<input class="weui-switch" type="checkbox"/>
-					</div>
-				</div>
+      <form action ="" method="POST" class="form" role="form">
 
+        <div class="weui-cells weui-cells_form">
 
-				<div class="weui-cell weui-cell_switch">
-					<div class="weui-cell__bd">通知1</div>
-					<div class="weui-cell__ft">
-						<input class="weui-switch" type="checkbox"/>
-					</div>
-				</div>
+          <div class="weui-cell weui-cell_switch">
+            <div class="weui-cell__bd">学院通知</div>
+            <div class="weui-cell__ft">
+              <input class="weui-switch" type="checkbox" name="check" value="academy"/>
+            </div>
+          </div>
 
-				<div class="weui-cell weui-cell_switch">
-					<div class="weui-cell__bd">通知2</div>
-					<div class="weui-cell__ft">
-						<input class="weui-switch" type="checkbox"/>
-					</div>
-				</div>
-				<div class="weui_cells_title">根据需要,选择对应的功能</div>
+          <div class="weui-cell weui-cell_switch">
+            <div class="weui-cell__bd">就业信息</div>
+            <div class="weui-cell__ft">
+              <input class="weui-switch" type="checkbox" name="check" value="interview" />
+            </div>
+          </div>
 
-				<div class="weui_btn_area">
-					<a class="weui_btn weui_btn_primary" id="submit">保存</a>
-				</div>
+          <div class="weui-cell weui-cell_switch">
+            <div class="weui-cell__bd">学术报告</div>
+            <div class="weui-cell__ft">
+              <label>
+                <input class="weui-switch" type="checkbox" name="check" value="report"/>
+              </label>
+            </div>
+          </div>
 
-				<div id="loadingToast" class="weui_loading_toast" style="display: none;">
-					<div class="weui_mask_transparent"></div>
-					<div class="weui_toast">
-						<div class="weui_loading">
-							<div class="weui_loading_leaf weui_loading_leaf_0"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_1"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_2"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_3"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_4"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_5"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_6"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_7"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_8"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_9"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_10"></div>
-							<div class="weui_loading_leaf weui_loading_leaf_11"></div>
-						</div>
-						<p class="weui_toast_content">保存完成</p>
-					</div>
-				</div>
+        </div>
 
-			</div>
-		</div>
+        <div class="weui_cells_title">根据需要,选择对应的功能</div>
 
+        <div id="loadingToast" class="weui_loading_toast" style="display: none;">
+          <div class="weui_mask_transparent"></div>
+          <div class="weui_toast">
+            <div class="weui_loading">
+              <div class="weui_loading_leaf weui_loading_leaf_0"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_1"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_2"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_3"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_4"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_5"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_6"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_7"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_8"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_9"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_10"></div>
+              <div class="weui_loading_leaf weui_loading_leaf_11"></div>
+            </div>
+            <p class="weui_toast_content">保存完成</p>
+          </div>
+        </div>
 
-		<script>
-			$(function () {
-				$("#button1").bind("click", function () {
-					if($("#btn").val()=="off"){
-						$("#btn").val("on");
-						console.log("开关1当前状态："+$("#btn").val());
-					}else{
-						$("#btn").val("off");
-						console.log("开关1当前状态："+$("#btn").val());
-					}
-				});
-			});
-		</script>
+        <div class="weui_btn_area">
+          <input class="weui_btn weui_btn_primary" type="submit" name="submit" value="保存">
+        </div>
 
+      </form>
 
-
-	</body>
+    </div>
+  </body>
 
 </html>

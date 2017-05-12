@@ -144,6 +144,11 @@ localhost来看看效果,觉得不错后再部署起来.
 * 暂时申请接口测试号进行开发  
 测试帐号拥有微信公众平台所有的接口
 
+* (高级群发接口](http://www.cnblogs.com/txw1958/p/weixin-mp-mass-send.html#.E5.88.A0.E9.99.A4.E7.BE.A4.E5.8F.91)
+公众平台为订阅号提供了每天一条的群发权限 [ 需要认证 ]
+高级群发接口的每日调用限制为10次(包括上传素材和群发消息的调用)
+用户每月只能接收4条群发信息
+
 * ```ACCESS_TOKEN```  
 [详见微信开发文档](http://link.zhihu.com/?target=https%3A//mp.weixin.qq.com/wiki/14/9f9c82c1af308e3b14ba9b973f99a8ba.html)<br />
 `access_token`是公众号的全局唯一票据，(获取access_token需要appid和appsecret)公众号调用各接口时都需使用access_token。

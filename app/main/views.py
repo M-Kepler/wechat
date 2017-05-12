@@ -9,6 +9,7 @@ from .forms import CommentForm, PostForm, EditProfileForm, EditProfileAdminForm,
 from ..config import DevelopmentConfig as config
 from sqlalchemy import extract, func
 from datetime import datetime
+from app.wechat.func_plugins import wechat_custom
 
 basepath = path.abspath(path.dirname(__file__))
 
@@ -116,7 +117,6 @@ def edit(id=0):
         post = Post(author_id = current_user.id)
     else:
         post = Post.query.get_or_404(id)
-
 
     if form.validate_on_submit():
         categoryemp = []
