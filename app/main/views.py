@@ -9,7 +9,10 @@ from .forms import CommentForm, PostForm, EditProfileForm, EditProfileAdminForm,
 from ..config import DevelopmentConfig as config
 from sqlalchemy import extract, func
 from datetime import datetime
+
 from app.wechat.func_plugins import wechat_custom
+from app.wechat.utils import init_wechat_sdk
+
 
 basepath = path.abspath(path.dirname(__file__))
 
@@ -129,7 +132,6 @@ def edit(id=0):
                 tag.name = t
                 #  tag.save()
             categoryemp.append(tag)
-
         post.categorys = categoryemp
         post.title = form.title.data
         post.body = form.body.data
@@ -313,72 +315,36 @@ def upload():
     else:
         ex=path.splitext(file.filename)[1] # 获取文件扩展名
         filename=datetime.now().strftime('%Y%m%d%H%M%S')+ex # 根据时间戳组装文件名
-        file.save(path.join(current_app.config['SAVEPIC'],filename))
+        file_path = path.join(current_app.config['SAVEPIC'], filename)
+        file.save(file_path)
+        #  wechat = init_wechat_sdk()
+        #  client = wechat['client']
+        #  url = client.media.upload_mass_image(file)
+        #  下载显示图片, response对象
         # 根据editormd的要求做返回
         res={
             'success':1,
             'message':u'图片上传成功',
-            'url':url_for('.image', name=filename)
+            'url':url_for('.image', name = filename)
         }
     return jsonify(res)
 
 
-#编辑器上传图片处理
 @main.route('/image/<name>')
 def image(name):
+    """ 编辑器上传图片处理, 将要插入的图片的地址
+    #  file.save(path.join(current_app.config['SAVEPIC'],filename))
+    #  wechat = init_wechat_sdk()
+    #  client = wechat['client']
+    #  res = client.media.upload('image', file_path)
+    #  media_id = res['media_id']
+    #  image = client.media.download(media_id)
+    #  url = client.media.get_url(media_id)
+    #  下载显示图片, response对象
+    """
     with open(path.join(current_app.config['SAVEPIC'],name),'rb') as f:
+        print(name)
+        print(type(f))
         resp = Response(f.read(),mimetype="image/jpeg")
     return resp
 
-
-
-'''
-#  上传文件
-@main.route('/upload', methods = ['GET', 'POST'])
-def upload():
-    if request.method=='POST':
-        f = request.files['file']
-        basepath = path.abspath(path.dirname(__file__))
-        upload_path = path.join(basepath,'static/uploads')
-        f.save(upload_path, secure_filename(f.filename))
-        return redirect(url_for('main.upload'))
-    return render_template('upload.html')
-
-@main.route('/projects/')
-def projects():
-    return render_template('projects.html')
-
-
-#  定义自己的jinja2过滤器
-@app.template_filter('reverse')
-def reverse_filter(s):
-    return s[::-1]
-
-@app.template_filter('md')
-def markdown_to_html(txt):
-    from markdown import markdown
-    return markdown(txt)
-
-#  -------------
-#  通过上下文处理器把方法注册进去,这样所有模板都可以使用这个方法/变量
-#  所以就可以将文件读取到变量然后传递到jinja供模板使用,
-#  读取md文件并显示到模板中
-def read_md(filename):
-    with open(filename) as md_file:
-        content = reduce(lambda x, y: x + y, md_file.readlines()) #  读取文件,注意reduce要从functools导入
-    return content
-
-#  注册方法到程序上下文
-@app.context_processor
-def inject_methods():
-    return dict(read_md=read_md)
-
-@app.template_test('current_link')
-def is_current_link(link):
-    return link[0] is request.url
-
-def qsbk():
-    lines = f.readlines()
-    return render_template('qsbk.html',lines=lines)
-
-'''

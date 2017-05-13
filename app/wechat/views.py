@@ -8,6 +8,7 @@ from .utils import check_wechat_signature, get_jsapi_signature_data, oauth_reque
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
+from .models.user import WechatUser
 import ast
 
 
@@ -151,16 +152,16 @@ def phone_number():
     return render_template('wechat/phone_number.html')
 
 
+@wechat.route('/user')
+def user():
+    """ 用户列表
+    """
+    users = WechatUser.query.all()
+    return render_template('wechat/user.html', users=users)
+
+
+
 @wechat.errorhandler(404)
 def page_not_found(e):
     return '404, PAGE NOTE FOUND!'
-
-
-'''
-@wechat.errorhandler(Exception)
-def unhandled_exception(error):
-    current_app.logger.error('Unhandled Exception:%s', (error))
-    return "Error", 500
-'''
-
 
