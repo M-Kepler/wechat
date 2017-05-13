@@ -79,6 +79,7 @@ def response_text():
         u'^天气': get_weather,
         u'^新闻': get_school_news,
         u'^更新菜单': update_menu_setting,
+        u'^已收到' : receive_confirmed,
         u'\?|^？|^help|^帮助': all_command
             }
     #  匹配指令
@@ -210,10 +211,19 @@ def developing():
     return create_reply('该功能正在维护中...', msg).render()
 
 
+def receive_confirmed():
+    """ 确认信息已收到
+    """
+    return create_reply('该功能正在维护中...', msg).render()
+
+
+
+
 def play_music(music_title):
     """ 搜索网易云音乐 """
     music.query_music(openid, music_title)
     return 'success'
+
 
 def play_random_music():
     """ 随机豆瓣FM音乐 """

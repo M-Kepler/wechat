@@ -65,7 +65,7 @@ def auth_score_result(openid=None):
         errmsg_cache = redis.get(redis_prefix + openid)
         errmsg = errmsg_cache.decode()
         if errmsg:
-            redis.delete(redis_prefix + openid)
+            #  redis.delete(redis_prefix + openid)
             return jsonify({'errmsg' : errmsg})
         else:
             abort(404)

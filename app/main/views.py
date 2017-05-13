@@ -1,5 +1,5 @@
 # coding :utf-8
-from flask import flash, session, request, render_template, url_for, redirect, abort, current_app,g
+from flask import flash, session, request, Response, render_template, url_for, redirect, abort, current_app,g, jsonify
 from os import path
 from . import main
 from .. import db
@@ -291,7 +291,6 @@ def edit_profile_admin(id):
     return render_template('edit_profile.html', form = form, user=user)
 
 
-#  TODO
 @main.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html', code=404, e=e), 404
@@ -300,6 +299,37 @@ def page_not_found(e):
 @main.errorhandler(500)
 def internal_server_error(e):
     return render_template('error.html', code=500, e=e), 500
+
+
+@main.route('/upload/',methods=['POST'])
+def upload():
+    """ 处理图片上传 """
+    file=request.files.get('editormd-image-file')
+    if not file:
+        res={
+            'success':0,
+            'message':u'图片格式异常'
+        }
+    else:
+        ex=path.splitext(file.filename)[1] # 获取文件扩展名
+        filename=datetime.now().strftime('%Y%m%d%H%M%S')+ex # 根据时间戳组装文件名
+        file.save(path.join(current_app.config['SAVEPIC'],filename))
+        # 根据editormd的要求做返回
+        res={
+            'success':1,
+            'message':u'图片上传成功',
+            'url':url_for('.image', name=filename)
+        }
+    return jsonify(res)
+
+
+#编辑器上传图片处理
+@main.route('/image/<name>')
+def image(name):
+    with open(path.join(current_app.config['SAVEPIC'],name),'rb') as f:
+        resp = Response(f.read(),mimetype="image/jpeg")
+    return resp
+
 
 
 '''
@@ -317,7 +347,6 @@ def upload():
 @main.route('/projects/')
 def projects():
     return render_template('projects.html')
-
 
 
 #  定义自己的jinja2过滤器

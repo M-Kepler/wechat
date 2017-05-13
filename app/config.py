@@ -28,6 +28,7 @@ class DevelopmentConfig(Config):
     MAIL_USE_TLS=True
     MAIL_DEBUG = True
     ENABLE_THREADS=True
+    SAVEPIC='/home/kepler/Desktop/'
 
 
 class TestingConfig(Config):
