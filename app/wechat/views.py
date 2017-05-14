@@ -133,8 +133,8 @@ def auth_library_result(openid=None):
         abort(404)
 
 
-#  @oauth_request
 #  不用oauth授权的话, 只能传openid参数了
+@oauth_request
 @wechat.route('/setting/<openid>', methods=['GET', 'POST'])
 def setting(openid=None):
     if request.method == 'POST':
@@ -162,6 +162,52 @@ def user():
     return render_template('wechat/user.html', users=users)
 
 
+@wechat.route('/edit')
+def editpost(id=0):
+    form = PostForm()
+    if id == 0: # 新增, current_user当前登录用户
+        post = Post(author_id = current_user.id)
+    else:
+        post = Post.query.get_or_404(id)
+
+    if form.validate_on_submit():
+        categoryemp = []
+        category_list = form.category.data.split(',')
+        # 如果已经有这个分类就不用创建
+        for t in category_list:
+            tag = Category.query.filter_by(name=t).first()
+            if tag is None:
+                tag = Category()
+                tag.name = t
+                #  tag.save()
+            categoryemp.append(tag)
+        post.categorys = categoryemp
+        post.title = form.title.data
+        post.body = form.body.data
+
+        post.private = form.private.data
+        post.read_count = 0
+
+        db.session.add(post)
+        db.session.commit()
+        db.session.rollback()
+        return redirect(url_for('.post', id=post.id))
+
+    form.title.data = post.title
+    #  form.body.data = post.body
+    body_value= post.body
+
+    #  form.category.data = [i.name for i in post.categorys]
+    #  value = [i.name for i in post.categorys]
+    # TODO ☆ 为了把值传到input标签,我也没其他方法了, 然后将category的list元素用‘,’分割组成str传给input
+
+    value = ",".join([i.name for i in post.categorys])
+
+    mode='编辑' if id>0 else '添加'
+    return render_template('posts/edit.html', title ='%s - %s' % (mode, post.title), form=form,
+            post=post, value=value, body_value = body_value)
+
+
 @wechat.route('/editgroup/<int:id>', methods = ['GET','POST'])
 def editgroup(id=0):
     """ 修改用户分组 """
@@ -182,6 +228,16 @@ def editgroup(id=0):
         return redirect(url_for('wechat.user'))
     value = ",".join([i.name for i in user.user_group])
     return render_template('wechat/editgroup.html',form=form, user=user, value=value)
+
+
+@wechat.route('/groups/<name>', methods=['GET', 'POST'])
+def group(name):
+    group = Group.query.filter_by(name = name).first() # name对应的标签对象
+    page_index = request.args.get('page', 1, type=int)
+
+    pagination = group.wechatusers.order_by(WechatUser.id.desc()).paginate( page_index, per_page = 8, error_out=False)
+    users = pagination.items
+    return render_template("wechat/groups.html", name = name, users = users, group = group, pagination=pagination)
 
 
 @wechat.route('/push')

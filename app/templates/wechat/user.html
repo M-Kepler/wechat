@@ -46,7 +46,9 @@
 
 							<td>
 								{% for group in user.user_group%}
-								<span class="label label-primary text-left" id="group"> {{group.name}} </span>
+                <a href="{{ url_for('wechat.group', name = group.name) }}">
+                  <span class="label label-primary text-left" id="group"> {{group.name}} </span>
+                </a>
 								&nbsp &nbsp
 								{% endfor %}
 							</td>

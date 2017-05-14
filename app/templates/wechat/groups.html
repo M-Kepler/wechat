@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "bootstrap/pagination.html" import render_pagination %}
 
 {% block page_content %}
 <!DOCTYPE html>  
@@ -35,16 +36,20 @@
 					<tbody>
 						<tr>
 							{% for user in users%}
-							<td>
-								<button class= "btn btn-sm" data-toggle = "modal" data-target = "#myModal">
-									<span class="glyphicon glyphicon-edit" aria-hidden="true"> 分组</button></a>
+              <td>
+                <a href="{{ url_for('wechat.editgroup', id=user.id) }}" style="float:right">
+                  <button class= "btn btn-sm" data-toggle = "modal" data-target = "#update">
+                    <span class="glyphicon glyphicon-edit" aria-hidden="true"> 分组</button>
+                  </a>
 							</td>
 							<td>{{user.realname}}</td>
 							<td>{{user.classname}}</td>
 
 							<td>
 								{% for group in user.user_group%}
-								<span class="label label-primary text-left"> {{group.name}} </span>
+                <a href="{{ url_for('wechat.group', name = group.name) }}">
+                  <span class="label label-primary text-left" id="group"> {{group.name}} </span>
+                </a>
 								&nbsp &nbsp
 								{% endfor %}
 							</td>
@@ -52,51 +57,54 @@
 							<td>{{user.city}}</td>
 							<td>{{user.openid}}</td>
 						</tr>
-
-						<!-- 模态框（Modal） -->
-						<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-							<div class="modal-dialog">
-								<div class="modal-content">
-									<div class="modal-header">
-										<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-											&times;
-										</button>
-										<h4 class="modal-title" id="myModalLabel">
-                      编辑用户{{user.realname}}的分组
-										</h4>
-									</div>
-									<div class="modal-body">
-										{% for group in user.user_group%}
-										<input class= "form-contral" style = "width:120px" placeholder = "输入分类" id = "category" name = "category" value = "{{group.name}}" type = "text" data-role = "tagsinput"/>
-										&nbsp &nbsp
-										{% endfor %}
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-default" data-dismiss="modal">关闭
-										</button>
-										<button type="button" class="btn btn-primary">
-											提交更改
-										</button>
-									</div>
-								</div><!-- /.modal-content -->
-							</div><!-- /.modal -->
-							{% endfor %}
-						</tbody>
-					</table>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div><!-- end of panel -->
+		</div>
 
 
 
-				</div><!-- end of panel -->
-			</div>
+		<script>
+			$(function(){
+				//触发模态框的同时调用此方法  
+				function editInfo(obj) {  
+					var id = $(obj).attr("id");  
+					//获取表格中的一行数据  
+					var stuno = document.getElementById("table").rows[id].cells[0].innerText;  
+					var pass = document.getElementById("table").rows[id].cells[1].innerText;  
+					var name = document.getElementById("table").rows[id].cells[2].innerText;  
+					var sex = document.getElementById("table").rows[id].cells[3].innerText;  
+					//向模态框中传值  
+					$('#stuno').val(stuno);  
+					$('#pass').val(pass);  
+					$('#stuname').val(name);  
+					if (sex == '女') {  
+						document.getElementById('women').checked = true;  
+					} else {  
+						document.getElementById('man').checked = true;  
+					}  
+						$('#update').modal('show');  
+					}  
+					//提交更改  
+					function update() {  
+						//获取模态框数据  
+						var stuno = $('#stuno').val();  
+						var pass = $('#pass').val();  
+						var name = $('#stuname').val();  
+						var sex = $('input:radio[name="sex"]:checked').val();  
+						$.ajax({  
+							type: "post",  
+							url: "update.do",  
+							data: "stuno=" + stuno + "&pass=" + pass + "&name=" + name + "&sex=" + sex,  
+							dataType: 'html',  
+							contentType: "application/x-www-form-urlencoded; charset=utf-8",  
+							success: function(result) {  
+								//location.reload();  
+							}  
+						});  
+					}  
 
-
-
-			<!-- jQuery1.11.3 (necessary for Bo otstrap's JavaScript plugins) -->
-			<script src="js/jquery-1.11.3.min.js "></script>
-			<!-- Include all compiled plugins (below), or include individual files as needed -->
-			<script src="js/bootstrap.min.js "></script>
-			<script>
-				$(function(){
 					function initTableCheckbox() {  
 						var $thr = $('table thead tr');  
 						var $checkAllTh = $('<th><input type="checkbox" id="checkAll" name="checkAll" /></th>');  
@@ -145,3 +153,4 @@
 	</html>
 
 	{% endblock %}
+

@@ -70,17 +70,6 @@ def post(id):
             return redirect(url_for('.post', id=post.id, page=-1))
     comment_count = len(post.comments)
 
-#  TODO
-    #  page_index = request.args.get('page', 1, type=int)
-    #  if page_index == -1:
-        #  page_index = (comment_count-1)//config.PER_POSTS_PER_PAGE + 1
-
-    #  pagination = post.comments.query.order_by(Comment.create_time.desc()).paginate(
-            #  page_index, per_page = config.PER_POSTS_PER_PAGE, error_out = False)
-    #  comments= pagination.items
-    #  return render_template('posts/detail.html', title='M-Kepler | ' + post.title, form=form, post=post, comments=comments, pagination = pagination, comment_count = comment_count)
-
-
     form.body.data = ''
     categorys = Category.query.order_by(Category.id)[::-1] # 所有标签返回的是一个元组
     return render_template('posts/detail.html', title='M-Kepler | ' + post.title, form=form, post=post,
