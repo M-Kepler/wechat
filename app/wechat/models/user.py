@@ -4,6 +4,7 @@
 
 from app import db
 from datetime import datetime
+from app.models import registrations
 
 
 class WechatUser(db.Model):
@@ -20,6 +21,10 @@ class WechatUser(db.Model):
     country = db.Column(db.String(20), nullable=True)
     headimgurl = db.Column(db.String(150), nullable=True)
     regtime = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user_group = db.relationship('Group', secondary=registrations,
+            backref = db.backref('wechatusers', lazy='dynamic'), 
+            lazy = 'dynamic')
 
     #  phone_number = db.Column(db.String(32), nullable=True)
     #  eamil = db.Column(db.String(32), nullable=True)
@@ -49,4 +54,10 @@ class WechatUser(db.Model):
     def update(self):
         db.session.commit()
         return self
+
+
+class Group(db.Model):
+    __tablename__ = 'groups'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
 

@@ -14,7 +14,9 @@ from sqlalchemy import func, extract
 
 registrations= db.Table('registrations',
         db.Column('post_id', db.Integer, db.ForeignKey('posts.id')),
-        db.Column('category_id.id', db.Integer, db.ForeignKey('categorys.id'))
+        db.Column('category_id.id', db.Integer, db.ForeignKey('categorys.id')),
+        db.Column('user_openid', db.Integer, db.ForeignKey('wechatusers.id')),
+        db.Column('user_groupid', db.Integer, db.ForeignKey('groups.id'))
         )
 
 class Post(db.Model):

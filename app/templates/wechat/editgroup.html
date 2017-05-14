@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block head %}
+{{super()}}
+{% endblock %}
+
+
+{% block styles %}
+{{super()}}
+<link href = "../../static/css/bootstrap-tagsinput.css" rel = "stylesheet">
+<link href = "../../static/css/bootstrap-tagsinput-typeahead.css" rel = "stylesheet">
+{% endblock %}
+
+{% block page_content %}
+{{super()}}
+<form action ="" method="POST" class="form" role="form">
+  {{ form.hidden_tag() }}
+  <div class= "raw">
+    <div clas= "col-md-6">
+      用户{{user.realname}} 的分组：
+      <input class= "form-contral" style = "width:220px" placeholder = "输入分类" id = "group" name = "group" value = "{{value}}" type = "text" data-role = "tagsinput"/>
+      <div style="float:right "> {{ form.submit(class="btn btn-primary") }} </div>
+    </div>
+</div>
+  </form>
+{% endblock %}

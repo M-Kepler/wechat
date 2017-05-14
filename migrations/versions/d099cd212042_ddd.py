@@ -1,13 +1,13 @@
-"""init
+"""ddd
 
-Revision ID: ebaabe905451
+Revision ID: d099cd212042
 Revises: None
-Create Date: 2017-04-25 22:04:18.040953
+Create Date: 2017-05-13 18:31:30.172228
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'ebaabe905451'
+revision = 'd099cd212042'
 down_revision = None
 
 from alembic import op
@@ -26,6 +26,12 @@ def upgrade():
     sa.UniqueConstraint('openid')
     )
     op.create_table('categorys',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=50), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
+    op.create_table('groups',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -94,8 +100,12 @@ def upgrade():
     op.create_table('registrations',
     sa.Column('post_id', sa.Integer(), nullable=True),
     sa.Column('category_id.id', sa.Integer(), nullable=True),
+    sa.Column('user_openid', sa.Integer(), nullable=True),
+    sa.Column('user_groupid', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id.id'], ['categorys.id'], ),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], )
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
+    sa.ForeignKeyConstraint(['user_groupid'], ['groups.id'], ),
+    sa.ForeignKeyConstraint(['user_openid'], ['wechatusers.id'], )
     )
     ### end Alembic commands ###
 
@@ -111,6 +121,7 @@ def downgrade():
     op.drop_table('users')
     op.drop_table('wechatusers')
     op.drop_table('roles')
+    op.drop_table('groups')
     op.drop_table('categorys')
     op.drop_table('auth')
     ### end Alembic commands ###

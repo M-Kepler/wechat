@@ -3,3 +3,7 @@
 2017-05-13 16:32:28,364 WARNING: 内网查询出错：'SHOOL_LAN_PROXIES'[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:53]
 2017-05-13 16:33:00,542 WARNING: 外网查询出错：404 Client Error: Not Found for url: http://bkjw2.guet.edu.cn/student/public/login.asp[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:45]
 2017-05-13 16:33:00,564 WARNING: 内网查询出错：'SHOOL_LAN_PROXIES'[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:53]
+2017-05-13 20:12:58,467 WARNING: 外网查询出错：404 Client Error: Not Found for url: http://bkjw2.guet.edu.cn/student/public/login.asp[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:45]
+2017-05-13 20:12:58,468 WARNING: 内网查询出错：'SHOOL_LAN_PROXIES'[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:53]
+2017-05-13 20:13:05,134 WARNING: 外网查询出错：404 Client Error: Not Found for url: http://bkjw2.guet.edu.cn/student/public/login.asp[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:45]
+2017-05-13 20:13:05,135 WARNING: 内网查询出错：'SHOOL_LAN_PROXIES'[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/score.py:53]

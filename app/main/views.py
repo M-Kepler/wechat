@@ -110,6 +110,7 @@ def str_to_obj(new_category):
             c.append(category_obj)
     return category_obj
 
+
 @main.route('/edit', methods = ['GET', 'POST'])
 @main.route('/edit/<int:id>', methods = ['GET','POST'])
 @login_required
@@ -151,6 +152,7 @@ def edit(id=0):
     #  form.category.data = [i.name for i in post.categorys]
     #  value = [i.name for i in post.categorys]
     # TODO ☆ 为了把值传到input标签,我也没其他方法了, 然后将category的list元素用‘,’分割组成str传给input
+
     value = ",".join([i.name for i in post.categorys])
 
     mode='编辑' if id>0 else '添加'

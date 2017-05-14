@@ -4,7 +4,7 @@ from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand, upgrade
 from app import create_app, db
 from app.models import User, Role, Category, Post, Comment
-from app.wechat.models.user import WechatUser
+from app.wechat.models.user import WechatUser, Group
 from app.wechat.models.auth import Auth
 from app.wechat.utils import init_wechat_sdk
 from livereload import Server
@@ -28,7 +28,7 @@ def dev():
 #  所以配置一下shell命令的上下文,就可以在shell里用了,不用每次都导入
 def make_shell_context():
     return dict(app=app, db=db, User=User, Role=Role, Post=Post, Comment=Comment, Category=Category,
-            WechatUser=WechatUser, Auth=Auth, init_wechat_sdk = init_wechat_sdk)
+            WechatUser=WechatUser,Group = Group, Auth=Auth, init_wechat_sdk = init_wechat_sdk)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 

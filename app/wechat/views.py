@@ -8,7 +8,8 @@ from .utils import check_wechat_signature, get_jsapi_signature_data, oauth_reque
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
-from .models.user import WechatUser
+from .models.user import WechatUser, Group
+from .form import GroupForm
 import ast
 
 
@@ -157,11 +158,39 @@ def user():
     """ 用户列表
     """
     users = WechatUser.query.all()
+    #  group_value = ",".join([i.name for i in user.user_group])
     return render_template('wechat/user.html', users=users)
 
+
+@wechat.route('/editgroup/<int:id>', methods = ['GET','POST'])
+def editgroup(id=0):
+    """ 修改用户分组 """
+    form = GroupForm()
+    user = WechatUser.query.get_or_404(id)
+    if form.validate_on_submit():
+        groupemp = []
+        groupemp_list = form.group.data.split(',')
+        for t in groupemp_list:
+            tag = Group.query.filter_by(name=t).first()
+            if tag is None:
+                tag = Group()
+                tag.name = t
+                #  tag.save()
+            groupemp.append(tag)
+        user.user_group = groupemp
+        user.save()
+        return redirect(url_for('wechat.user'))
+    value = ",".join([i.name for i in user.user_group])
+    return render_template('wechat/editgroup.html',form=form, user=user, value=value)
+
+
+@wechat.route('/push')
+def push():
+    return render_template('wechat/push_text.html')
 
 
 @wechat.errorhandler(404)
 def page_not_found(e):
     return '404, PAGE NOTE FOUND!'
+
 
