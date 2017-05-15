@@ -3,6 +3,14 @@ from app import db
 from datetime import datetime
 
 
+class Pushtext(db.Model):
+    """ 推送文本消息 """
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        return self
+
+
 class Pushpost(db.Model):
     __tablename__ = 'pushposts'
     id = db.Column(db.Integer, primary_key=True)
@@ -10,7 +18,7 @@ class Pushpost(db.Model):
     body = db.Column(db.Text)
     #  把markdown原文格式成html存到数据库，而不是访问时在格式
     body_html = db.Column(db.Text)
-    is_to_all = db.Column(db.Boolean, default=True)
+    is_to_all = db.Column(db.Boolean, default=False)
     create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))

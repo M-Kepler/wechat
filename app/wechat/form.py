@@ -13,10 +13,21 @@ class GroupForm(Form):
     submit = SubmitField(('提交'))
 
 
+class TextForm(Form):
+    group = StringField("发送给分组", validators=[DataRequired()])
+    textarea = PageDownField(label=('正文'), validators=[DataRequired()])
+    is_to_all = BooleanField("发给全部用户")
+    submit = SubmitField(('提交'))
+
+    def __init__(self,  *args, **kwargs):
+        super(TextForm, self).__init__(*args, **kwargs)
+        self.group.choices=[(group.id, group.name)
+                for group in Group.query.order_by(Group.name).all()]
+
+
 class MessagePushForm(Form):
     """ 发布 """
     title = StringField(label=('标题'), validators=[DataRequired()])
-    #  category = SelectField(label=('文章分类:'), coerce=int)
     group = StringField("发送给分组", validators=[DataRequired()])
     body = PageDownField(label=('正文'), validators=[DataRequired()])
     is_to_all = BooleanField("发给全部用户")
@@ -26,3 +37,4 @@ class MessagePushForm(Form):
         super(MessagePushForm, self).__init__(*args, **kwargs)
         self.group.choices=[(group.id, group.name)
                 for group in Group.query.order_by(Group.name).all()]
+

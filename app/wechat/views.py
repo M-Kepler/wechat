@@ -13,7 +13,7 @@ from .func_plugins import score
 from .models import is_user_exists
 from .models.user import WechatUser, Group
 from .models.pushpost import Pushpost
-from .form import GroupForm, MessagePushForm
+from .form import GroupForm, MessagePushForm, TextForm
 from .utils import check_wechat_signature, get_jsapi_signature_data,\
         oauth_request, openid_list, init_wechat_sdk
 
@@ -226,11 +226,12 @@ def push():
         pushpost.body = form.body.data
         pushpost.is_to_all = form.is_to_all.data
         #  判断发送类型选择合适的函数
-        if not form.title.data:
-            #  文字推送
+        print(form.is_to_all.data)
+        if not form.title.data: #  文字推送
             content = form.body.data
             if not form.is_to_all.data:
                 group_name = form.group.data
+                print(group_name)
                 to_group =  Group.query.filter_by(name=group_name).first()
                 to_user = []
                 for u in to_group.wechatusers:
@@ -250,7 +251,6 @@ def push():
         else:
             #  图文推送
             print(form.title.data)
-
         pushpost.save()
         return redirect(url_for('wechat.pushedpost'))
 
@@ -259,6 +259,33 @@ def push():
     #  value = ",".join([i.name for i in post.categorys])
     return render_template('wechat/messagepush.html', title = pushpost.title, form=form, pushpost=pushpost, body_value = body_value)
 
+
+
+@wechat.route('/pushtext', methods=['GET', 'POST'])
+def pushtext():
+    """ 推送文字信息 """
+    form = TextForm()
+    wechat = init_wechat_sdk()
+    client = wechat['client']
+    content = form.textarea.data
+    #  group_name = form.group.data
+    group_name = form.group.data
+    #  to_group =  Group.query.filter_by(name=group_name).first()
+    to_group =  Group.query.get(form.group.data)
+    to_user = []
+    for u in to_group.wechatusers:
+        to_user.append(u.openid)
+    current_app.logger.warning('to_user_list:%s' % to_user)
+    try:
+        send_result = client.message.send_mass_text(to_user, content)
+        current_app.logger.warning(u'发送结果：%s' % e)
+        media_id = send_result['msg_id']
+        mass_status = client.message.get_mass(media_id)
+    except Exception as e:
+        print(e)
+        #  TODO  消息存到数据库, 在文章下面显示
+        current_app.logger.warning(u'发送情况：%s' % mass_status)
+    return redirect(url_for('wechat.user'))
 
 
 @wechat.errorhandler(404)
