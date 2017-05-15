@@ -47,7 +47,7 @@
 							<td>
 								{% for group in user.user_group%}
                 <a href="{{ url_for('wechat.group', name = group.name) }}">
-                  <span class="label label-primary text-left" id="group"> {{group.name}} </span>
+                  <span class="btn label label-primary text-left" id="group"> {{group.name}} </span>
                 </a>
 								&nbsp &nbsp
 								{% endfor %}
@@ -56,33 +56,6 @@
 							<td>{{user.city}}</td>
 							<td>{{user.openid}}</td>
 						</tr>
-
-						<!-- 模态框（Modal） -->
-						<!-- 模态框（Modal） -->  
-						<div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">  
-							<div class="modal-dialog">  
-								<div class="modal-content">  
-									<div class="modal-header">  
-										<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>  
-										<h4 class="modal-title" id="myModalLabel">修改信息</h4>  
-									</div>  
-									<div class="modal-body">  
-								{% for group in user.user_group%}
-										学号：<input type="text" name="stuno" id="group" />
-										分组：<input class= "form-contral" style = "width:120px" placeholder = "输入分类" id = "category" name = "category" value = "{{group.name}}" type = "text" data-role = "tagsinput"/>
-								{% endfor %}
-									</div>  
-									<div class="modal-footer">  
-										<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>  
-										<button type="button" class="btn btn-primary" onclick="update()">提交更改</button>  
-									</div>  
-								</div>  
-								<!-- /.modal-content -->  
-							</div>  
-							<!-- /.modal -->  
-						</div>  
-						<!-- 模态框（Modal）end -->  
-
 						{% endfor %}
 					</tbody>
 				</table>

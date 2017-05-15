@@ -196,6 +196,7 @@ def category(name):
 def category_manager():
     return "category_manager test"
 
+
 @main.route('/category/delete<int:id>', methods=['GET', 'POST'])
 @admin_required
 @login_required

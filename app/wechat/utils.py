@@ -169,7 +169,6 @@ def openid_list(openid, values):
     """ FIXME 根据用户的设置把用户放到对应的发送列表里
     应该吧这些选择保存到数据库中
     """
-
     send_list = {
             'academy_list':academy_list,
             'interview_list':interview_list,

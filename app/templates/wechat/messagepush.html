@@ -1,0 +1,81 @@
+
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block head%}
+{{super()}}
+<script>
+  var testEditor;
+$(function(){
+  testEditor=editormd("test-editormd",{
+    width:'1200px',
+    height:'500px',
+    syncScrolling : "single",
+    path:"{{url_for('static',filename='editormd/lib/')}}",
+    previewTheme:"light",
+    imageUpload:true,
+    imageFormats:["jpg","jpeg","gif","png","bmp","webp"],
+    imageUploadURL:"{{url_for('main.upload')}}",
+  });
+})
+</script>
+{% endblock %}
+
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('static',filename='css/editormd/editormd.css')}}">
+{% endblock %}
+
+{% block page_content %}
+{{super()}}
+
+<form action ="" method="POST" class="form" role="form">
+  <!-- form.csrf_token()也行,否则validation_on_submit会验证失败 -->
+  {{ form.hidden_tag() }}
+    <div class = "raw">
+      <div class="col-md-6">
+        <label class="control-label" for="title">{{ form.title.label}}</label>
+        {{ form.title(class="form-control", placeholder=("输入文章标题"))}}
+      </div>
+    </div>
+
+
+    <!-- 下拉选择,这样就只能选一个标签了 -->
+    <!-- FIXME -->
+    <div class="col-md-2">
+      <label class="control-label" for="group">{{ form.group.label}}</label>
+      <select class="form-control" id="category" name="category" >
+        {% for choice in form.group.choices %}
+        <option value={{choice[1]}}> {{choice[1]}} </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class= "col-md-2">
+      <p class= "text-right">{{form.is_to_all.label}}</p>
+    </div>
+    <div class= "col-md-1">
+      {{form.is_to_all()}}
+    </div>
+
+
+    <div class="col-md-12">
+    <div style = "float:left" class="control-label" for="body">{{ form.body.label}} : </div>
+    <div style="float:right "> {{ form.submit(class="btn btn-primary") }} </div>
+
+  <div class= "editormd" id = "test-editormd">
+    <textarea class= "editormd-markdown-textarea" name = "body">{{body_value}}</textarea>
+  </div>
+
+
+</form>
+      </div>
+      {% endblock %}
+      {% block scripts %}
+      {{ super() }}
+      <!-- 预览markdown -->
+      {{ pagedown.include_pagedown() }}
+      <script src = "{{url_for('static',filename='js/editormd/editormd.min.js')}}"></script>
+      <script src = "{{url_for('static',filename='js/editormd/image-dialog.js')}}"></script>
+      {% endblock %}

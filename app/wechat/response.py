@@ -11,7 +11,7 @@ from wechatpy import parse_message, create_reply, events
 from wechatpy import WeChatClient
 from wechatpy.replies import TransferCustomerServiceReply
 from flask import current_app as app
-from .func_plugins import wechat_custom, music, score, weather, school_news
+from .func_plugins import wechat_custom, music, score, weather, school_news, message_confirmed
 from .models import set_user_info, get_user_student_info
 from .func_plugins.state import get_user_last_interact_time, set_user_last_interact_time
 from .utils import AESCipher, init_wechat_sdk
@@ -79,7 +79,7 @@ def response_text():
         u'^天气': get_weather,
         u'^新闻': get_school_news,
         u'^更新菜单': update_menu_setting,
-        u'^已收到' : receive_confirmed,
+        u'^收到' : receive_confirmed,
         u'\?|^？|^help|^帮助': all_command
             }
     #  匹配指令
@@ -245,7 +245,8 @@ def get_weather():
 
 def setting():
     """ 自定义订阅消息类型 """
-    setting_url = app.config['HOST_URL'] + '/setting/' + openid
+    #  setting_url = app.config['HOST_URL'] + '/setting/' + openid
+    setting_url = app.config['HOST_URL'] + '/setting'
     content = '<a href = "%s">［公众号消息设置］</a>' % setting_url
     reply = create_reply(content, msg)
     return reply.render()

@@ -1,17 +1,21 @@
 # !/usr/bin env python
 # coding:utf-8
+
+import ast
 from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
+from flask_login import login_required, current_user
+from sqlalchemy import extract, func
+from app import redis, db
 from . import wechat
-from app import redis
-from .utils import check_wechat_signature, get_jsapi_signature_data, oauth_request, openid_list
 from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
 from .models.user import WechatUser, Group
-from .form import GroupForm
-import ast
-
+from .models.pushpost import Pushpost
+from .form import GroupForm, MessagePushForm
+from .utils import check_wechat_signature, get_jsapi_signature_data,\
+        oauth_request, openid_list, init_wechat_sdk
 
 
 @wechat.route('/test')
@@ -134,8 +138,9 @@ def auth_library_result(openid=None):
 
 
 #  不用oauth授权的话, 只能传openid参数了
-@oauth_request
-@wechat.route('/setting/<openid>', methods=['GET', 'POST'])
+#  @wechat.route('/setting/<openid>', methods=['GET', 'POST'])
+#  @oauth_request
+@wechat.route('/setting', methods=['GET', 'POST'])
 def setting(openid=None):
     if request.method == 'POST':
         #TODO  这个openid_list的值只能设置一次,这里每更改一次这个list都会更改,看看人家怎么实现的
@@ -158,54 +163,12 @@ def user():
     """ 用户列表
     """
     users = WechatUser.query.all()
-    #  group_value = ",".join([i.name for i in user.user_group])
+    groups = Group.query.order_by(Group.id)[::-1] # 所有标签返回的是一个元组
+    for c in groups:
+        p = c.wechatusers.all()
+        if len(p) == 0: # 该分类下的文章数为0
+            db.session.delete(c)
     return render_template('wechat/user.html', users=users)
-
-
-@wechat.route('/edit')
-def editpost(id=0):
-    form = PostForm()
-    if id == 0: # 新增, current_user当前登录用户
-        post = Post(author_id = current_user.id)
-    else:
-        post = Post.query.get_or_404(id)
-
-    if form.validate_on_submit():
-        categoryemp = []
-        category_list = form.category.data.split(',')
-        # 如果已经有这个分类就不用创建
-        for t in category_list:
-            tag = Category.query.filter_by(name=t).first()
-            if tag is None:
-                tag = Category()
-                tag.name = t
-                #  tag.save()
-            categoryemp.append(tag)
-        post.categorys = categoryemp
-        post.title = form.title.data
-        post.body = form.body.data
-
-        post.private = form.private.data
-        post.read_count = 0
-
-        db.session.add(post)
-        db.session.commit()
-        db.session.rollback()
-        return redirect(url_for('.post', id=post.id))
-
-    form.title.data = post.title
-    #  form.body.data = post.body
-    body_value= post.body
-
-    #  form.category.data = [i.name for i in post.categorys]
-    #  value = [i.name for i in post.categorys]
-    # TODO ☆ 为了把值传到input标签,我也没其他方法了, 然后将category的list元素用‘,’分割组成str传给input
-
-    value = ",".join([i.name for i in post.categorys])
-
-    mode='编辑' if id>0 else '添加'
-    return render_template('posts/edit.html', title ='%s - %s' % (mode, post.title), form=form,
-            post=post, value=value, body_value = body_value)
 
 
 @wechat.route('/editgroup/<int:id>', methods = ['GET','POST'])
@@ -234,15 +197,68 @@ def editgroup(id=0):
 def group(name):
     group = Group.query.filter_by(name = name).first() # name对应的标签对象
     page_index = request.args.get('page', 1, type=int)
-
     pagination = group.wechatusers.order_by(WechatUser.id.desc()).paginate( page_index, per_page = 8, error_out=False)
     users = pagination.items
     return render_template("wechat/groups.html", name = name, users = users, group = group, pagination=pagination)
 
 
-@wechat.route('/push')
+@wechat.route('/pushedpost', methods=['GET', 'POST'])
+def pushedpost():
+    """ 历史推送 """
+    pushedposts = []
+    archives = db.session.query(extract('month', Pushpost.create_time).label('month'),
+            func.count('*').label('count')).group_by('month').all()
+    for archive in archives:
+        pushedposts.append((archive[0], db.session.query(Pushpost).filter(extract('month', Pushpost.create_time)==archive[0]).all()))
+    return render_template("wechat/pushedpost.html", title="历史推送", posts = pushedposts)
+
+
+@wechat.route('/push', methods=['GET', 'POST'])
 def push():
-    return render_template('wechat/push_text.html')
+    form = MessagePushForm()
+    wechat = init_wechat_sdk()
+    client = wechat['client']
+    pushpost = Pushpost(author_id = current_user.id)
+    if form.validate_on_submit():
+        #  把推送保存到数据库, 并发送微信
+        pushpost.to_group =  Group.query.get(form.group.data)
+        pushpost.title = form.title.data
+        pushpost.body = form.body.data
+        pushpost.is_to_all = form.is_to_all.data
+        #  判断发送类型选择合适的函数
+        if not form.title.data:
+            #  文字推送
+            content = form.body.data
+            if not form.is_to_all.data:
+                group_name = form.group.data
+                to_group =  Group.query.filter_by(name=group_name).first()
+                to_user = []
+                for u in to_group.wechatusers:
+                    to_user.append(u.openid)
+                current_app.logger.Warning('to_user_list:%s' % to_user)
+                try:
+                    send_result = client.message.send_mass_text(to_user, content)
+                except Exception as e:
+                    current_app.logger.warning(u'发送结果：%s' % e)
+                    media_id = send_result['msg_id']
+                    mass_status = client.message.get_mass(media_id)
+                    current_app.logger.warning(u'发送情况：%s' % mass_status)
+            else:
+                pass
+                #  client.message.send_mass_text(content, is_to_all)
+                #  推送给全部用户
+        else:
+            #  图文推送
+            print(form.title.data)
+
+        pushpost.save()
+        return redirect(url_for('wechat.pushedpost'))
+
+    form.title.data = pushpost.title
+    body_value= pushpost.body
+    #  value = ",".join([i.name for i in post.categorys])
+    return render_template('wechat/messagepush.html', title = pushpost.title, form=form, pushpost=pushpost, body_value = body_value)
+
 
 
 @wechat.errorhandler(404)
