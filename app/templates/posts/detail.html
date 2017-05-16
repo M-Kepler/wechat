@@ -14,18 +14,6 @@
     t = t + con;
     document.getElementById('reply_text').value=t
   }
-function moveEnd(obj){
-  obj.focus();
-  var len = obj.value.length;
-  if(document.selection){
-    var sel = obj.createTextRange();
-    sel.moveStart('character',len);
-    sel.collapse();
-    sel.select();
-  }else if(typeof obj.selectionStart=="number" && typeof obj.selectionEnd=='number'){
-    obj.selectionStart = obj.selectionEnd = len;
-  }
-}
 </script>
 
 {% endblock %}

@@ -202,17 +202,6 @@ def group(name):
     return render_template("wechat/groups.html", name = name, users = users, group = group, pagination=pagination)
 
 
-@wechat.route('/pushedpost', methods=['GET', 'POST'])
-def pushedpost():
-    """ 历史推送 """
-    pushedposts = []
-    archives = db.session.query(extract('month', Pushpost.create_time).label('month'),
-            func.count('*').label('count')).group_by('month').all()
-    for archive in archives:
-        pushedposts.append((archive[0], db.session.query(Pushpost).filter(extract('month', Pushpost.create_time)==archive[0]).all()))
-    return render_template("wechat/pushedpost.html", title="历史推送", posts = pushedposts)
-
-
 @wechat.route('/push', methods=['GET', 'POST'])
 def push():
     form = MessagePushForm()
@@ -260,7 +249,6 @@ def push():
     return render_template('wechat/messagepush.html', title = pushpost.title, form=form, pushpost=pushpost, body_value = body_value)
 
 
-
 @wechat.route('/pushtext', methods=['GET', 'POST'])
 def pushtext():
     """ 推送文字信息 """
@@ -276,7 +264,6 @@ def pushtext():
     for u in to_group.wechatusers:
         to_user.append(u.openid)
     try:
-        #  TODO  消息存到数据库, 在文章下面显示
         send_result = client.message.send_mass_text(to_user, content)
         current_app.logger.warning(u'发送结果：%s' % send_result)
         media_id = send_result['msg_id']
@@ -292,10 +279,31 @@ def pushtext():
 
         current_app.logger.warning('to_user_list:%s' % to_user)
         current_app.logger.warning(u'发送情况：%s' % mass_status)
+
+        #  收到情况
+
     except Exception as e:
         print(e)
-
     return redirect(url_for('wechat.user'))
+
+
+@wechat.route('/pushedtext', methods=['GET', 'POST'])
+def pushedtext():
+    """ 历史推送 """
+    pushedtexts = []
+    archives = db.session.query(extract('month', Pushtext.create_time).label('month'),
+            func.count('*').label('count')).group_by('month').all()
+    for archive in archives:
+        pushedtexts.append((archive[0], db.session.query(Pushtext).filter(extract('month', Pushtext.create_time)==archive[0]).all()))
+    return render_template("wechat/pushedtext.html", title="历史推送", posts = pushedtexts)
+
+
+
+@wechat.route('/pushedtext-detail/<int:id>')
+def pushedtext_detail(id):
+    """ 历史推送信息的详情"""
+    pushedtext = Pushtext.query.get(id)
+    return render_template('wechat/pushedtext_detail.html', pushedtext=pushedtext)
 
 
 @wechat.errorhandler(404)

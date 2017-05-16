@@ -72,7 +72,7 @@
                         {% for p in post[1] |sort(attribute='create_time',reverse=True)%}
                         <li>
                           <span>{{moment(p.create_time).format('YYYY.M.D')}}</span>
-                          <h5><span><a href="{{ url_for('main.post', id=p.id) }}">{{p.title}}</a></span></h5>
+                          <h5><span><a href="{{ url_for('wechat.pushedtext_detail', id=p.id) }}">{{p.content}}</a></span></h5>
                         </li>
                         {% endfor %}
                       </div>

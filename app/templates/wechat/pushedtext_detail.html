@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="container" >
+  {% for message in get_flashed_messages() %}
+  <div class="alert-info">{{ message }}</div>
+  {% endfor %}
+</div>
+
+<div class="container" style = "padding:10px">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="share mrl the-font">
+        <div style="padding:0px;"> <!-- <div style="padding:10px;"> -->
+            <div style="border-bottom:0px solid #DAD4D4;padding:10px 10px;background-color:#FFF;box-shadow:5px 5px 20px #CCC;">
+
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="share mrl the-font">
+                    <h3 style="float:left"><a href="{{ url_for('wechat.pushedtext', id=pushedtext.id) }}">{{pushedtext.content}}</a> </h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <div class="profile-thumbnail">
+                  <div class = "post-author">
+                    <small><span class="glyphicon glyphicon-user" aria-hedden="true"></span>
+                      <a href="{{url_for('.user', name=pushedtext.author.name) }}"> {{ pushedtext.author.name }}</a>
+                    </small>
+                    &nbsp &nbsp
+
+                    <small><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>
+                      {{ moment(pushedtext.create_time).format('YYYY.M.D-HH:mm:ss') }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <hr/>
+              <!-- 显示标签,点击标签显示该标签下的文章 -->
+              <a href="{{ url_for('wechat.group', name = pushedtext.to_group.name) }}">
+                <span style:"float:left"> 这条消息发给: </span>
+                <span style:"float:right" class="label label-primary text-left"> <span class="glyphicon glyphicon-tag" aria-hidden="true">
+              </span> {{pushedtext.to_group.name}}</span></a>
+            </div>
+          </div>
+      </div>
+
+
+      {% endblock	%}
+
+      {% block scripts %}
+      {{ super() }}
+      <!-- 预览markdown -->
+      {{ pagedown.include_pagedown() }}
+      {% endblock %}
