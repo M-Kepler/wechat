@@ -179,6 +179,9 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id')) # 表示该列的值是role表的id
 
     posts = db.relationship('Post', backref='author')
+    pushtext = db.relationship('Pushtext', backref='author')
+    pushpost = db.relationship('Pushpost', backref='author')
+
     comments = db.relationship('Comment', backref='author')
 
     def ping(self):

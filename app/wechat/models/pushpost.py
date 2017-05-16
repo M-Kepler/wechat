@@ -1,10 +1,17 @@
-
 from app import db
 from datetime import datetime
 
 
 class Pushtext(db.Model):
     """ 推送文本消息 """
+    __tablename__ = 'pushtexts'
+    id = db.Column(db.Integer, primary_key=True)
+    media_id = db.Column(db.String(64))
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    content = db.Column(db.Text)
+    create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
+
     def save(self):
         db.session.add(self)
         db.session.commit()

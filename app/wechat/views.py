@@ -12,7 +12,7 @@ from .response import handle_wechat_response
 from .func_plugins import score
 from .models import is_user_exists
 from .models.user import WechatUser, Group
-from .models.pushpost import Pushpost
+from .models.pushpost import Pushpost, Pushtext
 from .form import GroupForm, MessagePushForm, TextForm
 from .utils import check_wechat_signature, get_jsapi_signature_data,\
         oauth_request, openid_list, init_wechat_sdk
@@ -267,24 +267,34 @@ def pushtext():
     form = TextForm()
     wechat = init_wechat_sdk()
     client = wechat['client']
+
+    pushtext = Pushtext(author_id = current_user.id)
     content = form.textarea.data
-    #  group_name = form.group.data
     group_name = form.group.data
-    #  to_group =  Group.query.filter_by(name=group_name).first()
     to_group =  Group.query.get(form.group.data)
     to_user = []
     for u in to_group.wechatusers:
         to_user.append(u.openid)
-    current_app.logger.warning('to_user_list:%s' % to_user)
     try:
+        #  TODO  消息存到数据库, 在文章下面显示
         send_result = client.message.send_mass_text(to_user, content)
-        current_app.logger.warning(u'发送结果：%s' % e)
+        current_app.logger.warning(u'发送结果：%s' % send_result)
         media_id = send_result['msg_id']
         mass_status = client.message.get_mass(media_id)
+
+        pushtext.media_id = media_id
+        pushtext.to_group =  Group.query.get(form.group.data)
+        pushtext.content = content
+        pushtext.save()
+
+        redis_pushtext_prefix = "wechat:pushtext:" + media_id
+        redis.set(redis_pushtext_prefix, to_user, 86400)
+
+        current_app.logger.warning('to_user_list:%s' % to_user)
+        current_app.logger.warning(u'发送情况：%s' % mass_status)
     except Exception as e:
         print(e)
-        #  TODO  消息存到数据库, 在文章下面显示
-        current_app.logger.warning(u'发送情况：%s' % mass_status)
+
     return redirect(url_for('wechat.user'))
 
 
