@@ -10,10 +10,15 @@ class Pushtext(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     content = db.Column(db.Text)
     create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
+    to_confirmed = db.Column(db.String(100))
+    to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id')) # 所发给的分组
 
     def save(self):
         db.session.add(self)
+        db.session.commit()
+        return self
+
+    def update(self):
         db.session.commit()
         return self
 

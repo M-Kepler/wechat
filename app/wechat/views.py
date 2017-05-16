@@ -1,7 +1,7 @@
 # !/usr/bin env python
 # coding:utf-8
 
-import ast
+import ast, time, json
 from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from flask_login import login_required, current_user
@@ -257,30 +257,47 @@ def pushtext():
     client = wechat['client']
 
     pushtext = Pushtext(author_id = current_user.id)
-    content = form.textarea.data
+    content = form.textarea.data + current_app.config['CONFIRMED_WARNNING']
+
     group_name = form.group.data
     to_group =  Group.query.get(form.group.data)
     to_user = []
+    to_user_id = []
     for u in to_group.wechatusers:
         to_user.append(u.openid)
+        to_user_id.append(u.id)
     try:
         send_result = client.message.send_mass_text(to_user, content)
         current_app.logger.warning(u'发送结果：%s' % send_result)
         media_id = send_result['msg_id']
         mass_status = client.message.get_mass(media_id)
 
+        pushtext.content = content
         pushtext.media_id = media_id
         pushtext.to_group =  Group.query.get(form.group.data)
-        pushtext.content = content
+        pushtext.to_confirmed = json.dumps(to_user_id)
         pushtext.save()
 
+        #  保存最新一条推送的时间
+        redis.set("wechat:last_pushtext_time", time.strftime('%Y-%m-%d %H:%M:%S'))
+        redis.hmset("wechat:last_pushtext", {
+            "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
+            "to_confirmed" : to_user_id,
+            "media_id":media_id
+            })
+
+        #  保存信息到redis
         redis_pushtext_prefix = "wechat:pushtext:" + media_id
-        redis.set(redis_pushtext_prefix, to_user, 86400)
+        redis.hmset(redis_pushtext_prefix, {
+            "media_id" : media_id,
+            "to_user" : to_user,
+            "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
+            "to_confirmed" : to_user_id
+            })
 
         current_app.logger.warning('to_user_list:%s' % to_user)
         current_app.logger.warning(u'发送情况：%s' % mass_status)
 
-        #  收到情况
 
     except Exception as e:
         print(e)

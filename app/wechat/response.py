@@ -79,7 +79,7 @@ def response_text():
         u'^天气': get_weather,
         u'^新闻': get_school_news,
         u'^更新菜单': update_menu_setting,
-        u'^收到' : receive_confirmed,
+        u'^收到' : confirmed,
         u'\?|^？|^help|^帮助': all_command
             }
     #  匹配指令
@@ -211,12 +211,15 @@ def developing():
     return create_reply('该功能正在维护中...', msg).render()
 
 
-def receive_confirmed():
-    """ 确认信息已收到
-    """
-    return create_reply('该功能正在维护中...', msg).render()
-
-
+def confirmed():
+    """ 确认通知已经收到 """
+    if message_confirmed.confirmed(openid):
+        content = "已确认你已获悉%s及以上的通知" % media_id
+        reply = create_reply(content, msg)
+        return reply.render()
+    else :
+        app.logger.warning('消息确认出错')
+        return 'success'
 
 
 def play_music(music_title):

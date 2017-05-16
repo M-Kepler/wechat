@@ -2,16 +2,41 @@
 # _*_ coding:utf-8
 # 确认消息已收到
 
+import time, json
+from flask import current_app
 from app import redis
+from app.wechat.models.pushpost import Pushtext
+from app.wechat.models.user import WechatUser
+from wechatpy import create_reply
+from app.wechat.func_plugins.state import get_user_last_interact_time
+
 
 def confirmed(openid):
-    """　确认已收到id为'media_id'的信息推送
-    """
-    media_id = '';
-    redis_prefix = "wechatmessage:confirmed:" + media_id
-    redis.set(redis_prefix, openid_list, 7200)
-    openid_list = redis.get(redis_prefix)
-    if openid in openid_list:
-        pass
-        new_openid_list=openid_list.delete(openid)
-    redis.set(redis_prefix, new_openid_list, 7200)
+    """　确认已收到id为'media_id'的信息推送 """
+    user = WechatUser.query.filter_by(openid=openid).first()
+    user_id = user.id
+
+    last_push_time = redis.get("wechat:last_pushtext_time")
+    #  timeout = int(last_push_time.decode()) - int(get_user_last_interact_time(openid))
+    #  current_app.logger.warning('超时%s' % timeout)
+
+
+    last_push_cache = redis.hgetall("wechat:last_pushtext")
+    media_id = last_push_cache[b'media_id'].decode()
+
+    pushtext = Pushtext.query.filter_by(media_id=media_id).first()
+
+    to_confirmed_before = pushtext.to_confirmed
+
+    to_confirmed = json.loads(to_confirmed_before)
+    current_app.logger.warning('to_confirmed_应该是个list %s' % to_confirmed)
+    try:
+        to_confirmed.remove(user_id)
+        pushtext.to_confirmed = json.dumps(to_confirmed)
+        pushtext.update()
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+

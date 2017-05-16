@@ -67,7 +67,7 @@ def set_user_info(openid):
                 "regtime": user_info.regtime
                 })
 
-    #  存在信息缓存
+    #  存在信息缓存, 每天更新用户个人信息
     else:
         timeout = int(time.time()) - int(get_user_last_interact_time(openid))
         if timeout > 24 * 60 * 60:

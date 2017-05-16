@@ -313,6 +313,8 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 ## TODO
 
 1. 未完成
+* 用户对消息的确认
+* 确认情况放到数据库,显示在消息详情页上
 * [用户对消息的接受设置] 初步方案:User表增加个字段'subscribe_tag'保存用户选择的分类,比如'就业信息'
   发消息的时候先去看看用户的这个字段,如有'就业信息',才把这个openid加入到发送的用户列表
   [见wechatpy/message/send_mass_text](http://docs.wechatpy.org/zh_CN/master/_modules/wechatpy/client/api/message.html)
