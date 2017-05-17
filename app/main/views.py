@@ -11,7 +11,7 @@ from sqlalchemy import extract, func
 from datetime import datetime
 
 from app.wechat.func_plugins import wechat_custom
-from app.wechat.utils import init_wechat_sdk
+from app.wechat.utils import init_wechat_sdk, delete_dir
 
 
 basepath = path.abspath(path.dirname(__file__))
@@ -309,15 +309,18 @@ def upload():
         filename=datetime.now().strftime('%Y%m%d%H%M%S')+ex # 根据时间戳组装文件名
         file_path = path.join(current_app.config['SAVEPIC'], filename)
         file.save(file_path)
-        #  wechat = init_wechat_sdk()
-        #  client = wechat['client']
-        #  url = client.media.upload_mass_image(file)
-        #  下载显示图片, response对象
-        # 根据editormd的要求做返回
+        wechat = init_wechat_sdk()
+        client = wechat['client']
+        #  把图片上传到本地, 然后上传到微信, 得到url
+        with open(path.join(current_app.config['SAVEPIC'], filename),'rb') as f:
+            url = client.media.upload_mass_image(f)
+
+        #  delete_dir()
+        #  'url':url_for('.image', name = filename)
         res={
             'success':1,
             'message':u'图片上传成功',
-            'url':url_for('.image', name = filename)
+            'url':url
         }
     return jsonify(res)
 
@@ -335,8 +338,7 @@ def image(name):
     #  下载显示图片, response对象
     """
     with open(path.join(current_app.config['SAVEPIC'],name),'rb') as f:
-        print(name)
-        print(type(f))
         resp = Response(f.read(),mimetype="image/jpeg")
     return resp
+
 

@@ -1,6 +1,8 @@
 # coding:utf-8
 #  TODO global client为什么会保存?
 
+import os
+from os.path import join, getsize
 from . import wechat
 from app import redis
 from flask import request, redirect, abort, current_app, session
@@ -187,6 +189,23 @@ def openid_list(openid, values):
 def generate_random_str(N):
     """ 生成随机字符串 """
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
+
+
+def getdirsize(dir):
+    """ 获取文件夹大小"""
+    size = 0
+    for root, dir, files in os.walk(dir):
+        size += sum([getsize(join(root, name)) for name in files])
+    return size
+
+
+def delete_dir():
+    """ 清理文件夹内的文件 """
+    dirname = current_app.config('SAVEPIC')
+    maxsize = 50 # 文件夹大小大于50M就删除
+    filesize = getdirsize(dirname)
+    if filesize/1024/1024 > maxsize:
+        os.popen('rm -rf ' + dirname + '/*')
 
 
 class AESCipher:

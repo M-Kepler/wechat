@@ -15,7 +15,7 @@ class SearchForm(Form):
 class PostForm(Form):
     title = StringField(label=('标题'), validators=[DataRequired()])
     #  category = SelectField(label=('文章分类:'), coerce=int)
-    category = StringField("发送分组", validators=[DataRequired()])
+    category = StringField("文章分类", validators=[DataRequired()])
     body = PageDownField(label=('正文'), validators=[DataRequired()])
     private = BooleanField("私人")
     submit = SubmitField(('提交'))

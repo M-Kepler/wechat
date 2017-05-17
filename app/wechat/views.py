@@ -160,8 +160,7 @@ def phone_number():
 
 @wechat.route('/user')
 def user():
-    """ 用户列表
-    """
+    """ 用户列表 """
     users = WechatUser.query.all()
     groups = Group.query.order_by(Group.id)[::-1] # 所有标签返回的是一个元组
     for c in groups:
@@ -321,6 +320,36 @@ def pushedtext_detail(id):
     """ 历史推送信息的详情"""
     pushedtext = Pushtext.query.get(id)
     return render_template('wechat/pushedtext_detail.html', pushedtext=pushedtext)
+
+
+@wechat.route('/upload/',methods=['POST'])
+def upload():
+    """ 处理图片上传 """
+    file=request.files.get('editormd-image-file')
+    if not file:
+        res={
+            'success':0,
+            'message':u'图片格式异常'
+        }
+    else:
+        ex=path.splitext(file.filename)[1] # 获取文件扩展名
+        filename=datetime.now().strftime('%Y%m%d%H%M%S')+ex # 根据时间戳组装文件名
+        file_path = path.join(current_app.config['SAVEPIC'], filename)
+        file.save(file_path)
+        wechat = init_wechat_sdk()
+        client = wechat['client']
+        #  把图片上传到本地, 然后上传到微信, 得到url
+        with open(path.join(current_app.config['SAVEPIC'], filename),'rb') as f:
+            url = client.media.upload_mass_image(f)
+
+        #  delete_dir()
+        #  'url':url_for('.image', name = filename)
+        res={
+            'success':1,
+            'message':u'图片上传成功',
+            'url':url
+        }
+    return jsonify(res)
 
 
 @wechat.errorhandler(404)

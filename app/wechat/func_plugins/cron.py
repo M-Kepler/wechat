@@ -8,3 +8,4 @@ def update_access_token():
     定时更新微信的access_token
     """
     update_wechat_token()
+
