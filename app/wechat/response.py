@@ -213,13 +213,13 @@ def developing():
 
 def confirmed():
     """ 确认通知已经收到 """
-    if message_confirmed.confirmed(openid):
-        content = "已确认你已获悉%s及以上的通知" % media_id
+    try:
+        content=message_confirmed.confirmed(openid)
         reply = create_reply(content, msg)
         return reply.render()
-    else :
+    except Exception as e:
         app.logger.warning('消息确认出错')
-        return 'success'
+    return 'success'
 
 
 def play_music(music_title):

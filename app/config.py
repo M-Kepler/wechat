@@ -70,7 +70,7 @@ class WechatConfig(Config):
     JW_LOGIN_URL_LAN = ""
     JW_SCORE_URL_LAN = ""
     SCHOOL_NEWS_URL = "http://www.guet.edu.cn/ExtGuetWeb/News?stype=1"
-    CONFIRMED_WARNNING = "\n- - - - - - - - - - - - \n收到通知请回复'收到'\n"
+    CONFIRMED_WARNNING = "【通知：%s\n（收到通知请回复'收到'）】"
 
     #  每次修改都要更新菜单
     MENU_SETTING = {

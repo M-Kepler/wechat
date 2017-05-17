@@ -257,7 +257,7 @@ def pushtext():
     client = wechat['client']
 
     pushtext = Pushtext(author_id = current_user.id)
-    content = form.textarea.data + current_app.config['CONFIRMED_WARNNING']
+    content = current_app.config['CONFIRMED_WARNNING'] % form.textarea.data
 
     group_name = form.group.data
     to_group =  Group.query.get(form.group.data)

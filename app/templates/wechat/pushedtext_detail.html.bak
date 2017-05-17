@@ -38,13 +38,11 @@
               </div>
 
               <hr/>
-
               <!-- 显示标签,点击标签显示该标签下的文章 -->
               <span style:"float:left"> 这条消息发给:(点击查看该分组成员) </span>
               <a href="{{ url_for('wechat.group', name = pushedtext.to_group.name) }}">
                 <span style:"float:right" class="label label-primary text-left"> <span class="glyphicon glyphicon-tag" aria-hidden="true">
               </span> {{pushedtext.to_group.name}}</span></a>
-            </div>
             </div>
           </div>
       </div>

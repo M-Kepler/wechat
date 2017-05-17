@@ -27,6 +27,7 @@ def confirmed(openid):
     pushtext = Pushtext.query.filter_by(media_id=media_id).first()
 
     to_confirmed_before = pushtext.to_confirmed
+    content = pushtext.content
 
     to_confirmed = json.loads(to_confirmed_before)
     current_app.logger.warning('to_confirmed_应该是个list %s' % to_confirmed)
@@ -34,7 +35,8 @@ def confirmed(openid):
         to_confirmed.remove(user_id)
         pushtext.to_confirmed = json.dumps(to_confirmed)
         pushtext.update()
-        return True
+        content = "你已确认获悉此条及在其之前发布的通知：\n【%s】"% content
+        return content
     except Exception as e:
         print(e)
         return False
