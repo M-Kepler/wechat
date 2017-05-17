@@ -14,7 +14,7 @@ $(function(){
     previewTheme:"light",
     imageUpload:true,
     imageFormats:["jpg","jpeg","gif","png","bmp","webp"],
-    imageUploadURL:"{{url_for('wechat.upload')}}",
+    imageUploadURL:"{{url_for('main.upload')}}",
   });
   var log = function(s){
     window.console && console.log(s)
@@ -54,13 +54,13 @@ $(function(){
 
   <div class="tab-pane active" id="text">
     <!-- 推送文本 -->
-    <form action ="{{url_for("wechat.pushtext")}}" method="POST" class="form" role="form">
+    <form action ="{{url_for("wechat.pushtext")}}"" method="POST" class="form" role="form">
       {{ form.hidden_tag() }}
       <div class="col-md-2">
         <label class="control-label" for="group">{{ form.group.label}}</label>
         <select class="form-control" id="group" name="group" >
           {% for choice in form.group.choices %}
-          <option value={{choice[0]}}> {{choice[1]}} </option>
+            <option value={{choice[0]}}> {{choice[1]}} </option>
           {% endfor %}
         </select>
       </div>
@@ -76,39 +76,41 @@ $(function(){
 
   <div class="tab-pane" id="image">
     <!-- 推送图片 -->
-    <form action ="{{url_for("wechat.pushimage")}}" method="POST" class="form" role="form">
+    <form action ="" method="POST" class="form" role="form">
+      {{ form.hidden_tag() }}
       <div class="col-md-4">
         <label class="control-label" for="group">插入图片</label>
         <textarea name="text" rows="8" cols="40" style="resize:none;"></textarea>
       </div>
       <div class="col-md-12">
+        <div style="float:left"> {{ form.submit(class="btn btn-primary",id="newsSubmit") }} </div>
       </div>
     </form>
   </div>
 
   <div class="tab-pane" id="news">
     <!-- 图文推送 -->
-    <form action ="{{url_for("wechat.push")}}" method="POST" class="form" role="form">
-      {{ newsform.hidden_tag() }}
+    <form action ="" method="POST" class="form" role="form">
+      {{ form.hidden_tag() }}
       <div class = "raw">
         <div class="col-md-6">
-          <label class="control-label" for="title">{{ newsform.title.label}}</label>
-          {{ newsform.title(class="form-control", placeholder=("输入文章标题"))}}
+          <label class="control-label" for="title">{{ form.title.label}}</label>
+          {{ form.title(class="form-control", placeholder=("输入文章标题"))}}
         </div>
       </div>
 
       <!-- 下拉选择,这样就只能选一个标签了 -->
       <div class="col-md-2">
-        <label class="control-label" for="group">{{ newsform.group.label}}</label>
-        <select class="form-control" id="group" name="group" >
-          {% for choice in newsform.group.choices %}
-          <option value={{choice[0]}}> {{choice[1]}} </option>
+        <label class="control-label" for="group">{{ form.group.label}}</label>
+        <select class="form-control" id="category" name="category" >
+          {% for choice in form.group.choices %}
+          <option value={{choice[1]}}> {{choice[1]}} </option>
           {% endfor %}
         </select>
       </div>
 
       <div class="col-md-12">
-        <div style = "float:left" class="control-label" for="body">{{ newsform.body.label}} : </div>
+        <div style = "float:left" class="control-label" for="body">{{ form.body.label}} : </div>
       </div>
 
       <div class="col-md-12">
@@ -117,9 +119,10 @@ $(function(){
         </div>
       </div>
       <div class="col-md-12">
-        <div style="float:left"> {{ newsform.submit(class="btn btn-primary",id="newsSubmit") }} </div>
+        <div style="float:left"> {{ form.submit(class="btn btn-primary",id="newsSubmit") }} </div>
       </div>
     </form>
+
   </div>
 
   {% endblock %}

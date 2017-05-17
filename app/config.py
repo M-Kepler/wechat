@@ -46,6 +46,12 @@ class WechatConfig(Config):
     #  素材库图片ID
     MUSIC_THUMB_MEDIA_ID='bad_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro'
 
+    #  通知的封面ID
+    NEWS_THUMB_MEDIA_ID = 'bad_N1NZTEv_2maH7LQ6CEl8yzbTAU0zh8scpIyC6zw'
+    NEWS_AUTHOR = ''
+    NEWS_DIGEST = "阅读后请后台回复'收到'"
+    NEWS_CONTENT_SOURCE_URL = 'https://www.guet.edu.cn'
+
     EncodingAESKey = " "
 
     WELCOME_TEXT = "欢迎关注我的公众号.\n"

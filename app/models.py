@@ -180,7 +180,7 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
 
     posts = db.relationship('Post', backref='author')
     pushtext = db.relationship('Pushtext', backref='author')
-    pushpost = db.relationship('Pushpost', backref='author')
+    pushnews= db.relationship('Pushnews', backref='author')
 
     comments = db.relationship('Comment', backref='author')
 

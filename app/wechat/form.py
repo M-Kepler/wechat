@@ -16,7 +16,7 @@ class GroupForm(Form):
 class TextForm(Form):
     group = StringField("发送给分组", validators=[DataRequired()])
     textarea = PageDownField(label=('正文'), validators=[DataRequired()])
-    is_to_all = BooleanField("发给全部用户")
+    #  is_to_all = BooleanField("发给全部用户")
     submit = SubmitField(('提交'))
 
     def __init__(self,  *args, **kwargs):
@@ -25,16 +25,16 @@ class TextForm(Form):
                 for group in Group.query.order_by(Group.name).all()]
 
 
-class MessagePushForm(Form):
+class NewsForm(Form):
     """ 发布 """
     title = StringField(label=('标题'), validators=[DataRequired()])
     group = StringField("发送给分组", validators=[DataRequired()])
     body = PageDownField(label=('正文'), validators=[DataRequired()])
-    is_to_all = BooleanField("发给全部用户")
+    #  is_to_all = BooleanField("发给全部用户")
     submit = SubmitField(('提交'))
 
     def __init__(self,  *args, **kwargs):
-        super(MessagePushForm, self).__init__(*args, **kwargs)
+        super(NewsForm, self).__init__(*args, **kwargs)
         self.group.choices=[(group.id, group.name)
                 for group in Group.query.order_by(Group.name).all()]
 

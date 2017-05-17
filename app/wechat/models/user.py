@@ -60,7 +60,7 @@ class Group(db.Model):
     __tablename__ = 'groups'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
-    pushpost = db.relationship('Pushpost', backref='to_group')
+    pushnews= db.relationship('Pushnews', backref='to_group')
     pushtext = db.relationship('Pushtext', backref='to_group')
 
 

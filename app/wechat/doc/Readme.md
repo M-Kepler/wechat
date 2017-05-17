@@ -348,7 +348,15 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 * OAuth,[code失效的问题,就是这个原因](http://tieba.baidu.com/p/5032467480)
  * ["errcode":40163](http://www.imooc.com/qadetail/207788)
  * [用session保存必要信息,避免多次请求code](https://segmentfault.com/q/1010000008778286/a-1020000008779944)
-
+* 一个恶心我很久的问题**我添加永久图文素材时,总提示我media-id错误**,我还以为是我上传图片的问题(有两个接口,其中封面图片必须是永久图片素材(client.material.add),
+        另一个是临时素材(client.media.upload),图文消息内的图片就是用这个接口上传然后得到url,当到图文中....添加完就得到这个articles的media_id,就可以发送了
+```
+  File "/home/kepler/venv/lib/python3.5/site-packages/wechatpy/client/api/material.py", line 21, in add_articles
+      'thumb_media_id': article['thumb_media_id'],
+      TypeError: string indices must be integers
+* 原因是,我只有一个图文消息然后构建的格式是:articles = {...},而正确的应该是articles = [{...}], 看了源码才知道...
+* 添加图文素材接口:client.material.add_articles
+```
 
 ## XXX
 

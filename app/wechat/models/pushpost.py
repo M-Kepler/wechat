@@ -23,14 +23,14 @@ class Pushtext(db.Model):
         return self
 
 
-class Pushpost(db.Model):
-    __tablename__ = 'pushposts'
+class Pushnews(db.Model):
+    __tablename__ = 'pushnews'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64))
     body = db.Column(db.Text)
     #  把markdown原文格式成html存到数据库，而不是访问时在格式
+    media_id = db.Column(db.String(64))
     body_html = db.Column(db.Text)
-    is_to_all = db.Column(db.Boolean, default=False)
     create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
@@ -65,7 +65,7 @@ class Pushpost(db.Model):
        return data[0]
 
 
-db.event.listen(Pushpost.body, 'set', Pushpost.on_body_changed)# 当body被修改时触发
+db.event.listen(Pushnews.body, 'set', Pushnews.on_body_changed)# 当body被修改时触发
 
 
 

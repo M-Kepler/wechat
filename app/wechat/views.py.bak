@@ -2,7 +2,6 @@
 # coding:utf-8
 
 import ast, time, json
-from os import path
 from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from flask_login import login_required, current_user
@@ -201,47 +200,55 @@ def group(name):
     users = pagination.items
     return render_template("wechat/groups.html", name = name, users = users, group = group, pagination=pagination)
 
+'''
+id = db.Column(db.Integer, primary_key=True)
+title = db.Column(db.String(64))
+body = db.Column(db.Text)
+#  把markdown原文格式成html存到数据库，而不是访问时在格式
+body_html = db.Column(db.Text)
+create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
+'''
 
 @wechat.route('/push', methods=['GET', 'POST'])
 def push():
     """ 推送图文消息"""
-    newsform = NewsForm()
-    form = TextForm()
+    form = NewsForm()
     wechat = init_wechat_sdk()
     client = wechat['client']
     pushnews = Pushnews(author_id = current_user.id)
-    if request.method == 'POST':
+    if form.validate_on_submit():
         #  把推送保存到数据库, 并发送微信
-        title = newsform.title.data
-        body = newsform.body.data
-        to_group = Group.query.get(newsform.group.data)
+        title = form.title.data
+        body = form.body.data
+        to_group = Group.query.get(form.group.data)
         to_user = []
         to_user_id = []
         for u in to_group.wechatusers:
             to_user.append(u.openid)
             to_user_id.append(u.id)
-
-        articles= [{
-                'title':title,
-                'show_cover_pic' : 0,
-                'content':body, # 看看是否需要处理html
-                'author':current_user.name,
-                'thumb_media_id':current_app.config['NEWS_THUMB_MEDIA_ID'],
-                'digest':current_app.config['NEWS_DIGEST'],
-                'content_source_url':current_app.config['NEWS_SOURCE_URL']
-                }]
         try:
-            #  添加到图文素材库
-            res = client.material.add_articles(articles)
-            #  XXX, 为什么没有保存到数据库, 但却发送成功了
-            media_id = res['media_id']
-            current_app.logger.warning('添加的图文的media_id: %s' % media_id)
-            #  保存到数据库 TODO 多添加几个字段
+            #  保存到数据库
             pushnews.title = title
             pushnews.body = body
             pushnews.media_id = media_id
             pushnews.to_group = to_group
             pushnews.save()
+            #  TODO 多添加几个字段
+            articles= [{
+                    'title':title,
+                    'thumb_media_id':current_app.config['NEWS_THUMB_MEDIA_ID'],
+                    'author':current_app.config['NEWS_AUTHOR'],
+                    'digest':current_app.config['NEWS_DIGEST'],
+                    'show_cover_pic' : 0,
+                    'content':body, # 看看是否需要处理html
+                    'content_source_url':current_app.config['NEWS_SOURCE_URL']
+                    }]
+            #  添加到图文素材库
+            res = client.material.add_articles(articles)
+            media_id = res['media_id']
+            current_app.logger.warning('添加的图文的media_id: %s' % media_id)
             #  更新最新推送的通知缓存
             redis.set("wechat:last_pushtext_time", time.strftime('%Y-%m-%d %H:%M:%S'))
             redis.hmset("wechat:last_pushtext", {
@@ -267,7 +274,7 @@ def push():
             print(e)
         return redirect(url_for('wechat.user'))
     body_value = None
-    return render_template('wechat/messagepush.html', title = pushnews.title, newsform=newsform, form=form, pushpost=pushnews, body_value = body_value)
+    return render_template('wechat/messagepush.html', title = pushnews.title, form=form, pushpost=pushnews, body_value = body_value)
 
 
 @wechat.route('/pushtext', methods=['GET', 'POST'])
