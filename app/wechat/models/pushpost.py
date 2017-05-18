@@ -1,5 +1,8 @@
 from app import db
 from datetime import datetime
+import bleach
+from markdown import markdown
+from sqlalchemy import  extract
 
 
 class Pushtext(db.Model):
@@ -33,11 +36,16 @@ class Pushnews(db.Model):
     body_html = db.Column(db.Text)
     create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    to_confirmed = db.Column(db.String(100))
     to_group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
 
 
     def save(self):
         db.session.add(self)
+        db.session.commit()
+        return self
+
+    def update(self):
         db.session.commit()
         return self
 

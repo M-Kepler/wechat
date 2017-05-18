@@ -3,6 +3,7 @@
 
 import ast, time, json
 from os import path
+from datetime import datetime
 from flask import flash, session, request, render_template, url_for,\
         redirect, abort, current_app, g, jsonify, Markup
 from flask_login import login_required, current_user
@@ -221,33 +222,37 @@ def push():
             to_user.append(u.openid)
             to_user_id.append(u.id)
 
-        articles= [{
+        try:
+            #  添加到图文素材库
+            pushnews.title = title
+            pushnews.body = body
+            pushnews.to_group = to_group
+            pushnews.to_confirmed = json.dumps(to_user_id)
+            pushnews.save()
+            body_html=pushnews.body_html
+            #  更新最新推送的通知缓存
+            articles= [{
                 'title':title,
                 'show_cover_pic' : 0,
-                'content':body, # 看看是否需要处理html
+                'content':body_html, # 看看是否需要处理html
                 'author':current_user.name,
                 'thumb_media_id':current_app.config['NEWS_THUMB_MEDIA_ID'],
                 'digest':current_app.config['NEWS_DIGEST'],
-                'content_source_url':current_app.config['NEWS_SOURCE_URL']
-                }]
-        try:
-            #  添加到图文素材库
+                'content_source_url':current_app.config['NEWS_CONTENT_SOURCE_URL']
+            }]
             res = client.material.add_articles(articles)
             #  XXX, 为什么没有保存到数据库, 但却发送成功了
             media_id = res['media_id']
             current_app.logger.warning('添加的图文的media_id: %s' % media_id)
             #  保存到数据库 TODO 多添加几个字段
-            pushnews.title = title
-            pushnews.body = body
             pushnews.media_id = media_id
-            pushnews.to_group = to_group
-            pushnews.save()
-            #  更新最新推送的通知缓存
-            redis.set("wechat:last_pushtext_time", time.strftime('%Y-%m-%d %H:%M:%S'))
-            redis.hmset("wechat:last_pushtext", {
+            pushnews.update()
+            redis.set("wechat:last_push_time", time.strftime('%Y-%m-%d %H:%M:%S'))
+            redis.hmset("wechat:last_push", {
                 "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
                 "to_confirmed" : to_user_id,
-                "media_id":media_id
+                "media_id":media_id,
+                "pushtype":'news'
                 })
             redis_pushtext_prefix = "wechat:pushnews:" + media_id
             redis.hmset(redis_pushtext_prefix, {
@@ -256,6 +261,7 @@ def push():
                 "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
                 "to_confirmed" : to_user_id
                 })
+
         except Exception as e:
             print(e)
             current_app.logger.warning('添加图文到数据库和缓存失败')
@@ -300,11 +306,13 @@ def pushtext():
         pushtext.save()
 
         #  保存最新一条推送的时间
-        redis.set("wechat:last_pushtext_time", time.strftime('%Y-%m-%d %H:%M:%S'))
-        redis.hmset("wechat:last_pushtext", {
+        #  FIXME 这两个是不是重复了
+        redis.set("wechat:last_push_time", time.strftime('%Y-%m-%d %H:%M:%S'))
+        redis.hmset("wechat:last_push", {
             "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
             "to_confirmed" : to_user_id,
-            "media_id":media_id
+            "media_id":media_id,
+            "pushtype":'text'
             })
 
         #  保存信息到redis
