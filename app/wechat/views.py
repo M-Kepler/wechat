@@ -238,7 +238,9 @@ def push():
                 'author':current_user.name,
                 'thumb_media_id':current_app.config['NEWS_THUMB_MEDIA_ID'],
                 'digest':current_app.config['NEWS_DIGEST'],
-                'content_source_url':current_app.config['NEWS_CONTENT_SOURCE_URL']
+                'content_source_url':current_app.config['NEWS_CONTENT_SOURCE_URL'],
+                'need_open_comment' : '1',
+                'only_fans_can_comment' : '1'
             }]
             res = client.material.add_articles(articles)
             #  XXX, 为什么没有保存到数据库, 但却发送成功了
@@ -274,6 +276,29 @@ def push():
         return redirect(url_for('wechat.user'))
     body_value = None
     return render_template('wechat/messagepush.html', title = pushnews.title, newsform=newsform, form=form, pushpost=pushnews, body_value = body_value)
+
+
+@wechat.route('/pushednews', methods=['GET', 'POST'])
+def pushednews():
+    """ 历史推送的图文通知 """
+    pushednews = []
+    archives = db.session.query(extract('month', Pushnews.create_time).label('month'),
+            func.count('*').label('count')).group_by('month').all()
+    for archive in archives:
+        pushednews.append((archive[0], db.session.query(Pushnews).filter(extract('month', Pushnews.create_time)==archive[0]).all()))
+    return render_template("wechat/pushednews.html", title="已推送的图文通知", posts = pushednews)
+
+
+@wechat.route('/pushednews-detail/<int:id>')
+def pushednews_detail(id):
+    """ 推送的图文通知的详情"""
+    pushednews = Pushnews.query.get(id)
+    media_id = pushednews.media_id
+    wechat = init_wechat_sdk()
+    client = wechat['client']
+    get_material = client.material.get(media_id)
+    url = get_material[0]['url']
+    return render_template('wechat/pushednews_detail.html', url=url, pushednews=pushednews)
 
 
 @wechat.route('/pushtext', methods=['GET', 'POST'])
@@ -333,28 +358,32 @@ def pushtext():
     return redirect(url_for('wechat.user'))
 
 
-@wechat.route('/pushimage', methods=['GET', 'POST'])
-def pushimage():
-    """ 推送图片 """
-    pass
 
 
 @wechat.route('/pushedtext', methods=['GET', 'POST'])
 def pushedtext():
-    """ 历史推送 """
+    """ 历史推送的文本通知 """
     pushedtexts = []
     archives = db.session.query(extract('month', Pushtext.create_time).label('month'),
             func.count('*').label('count')).group_by('month').all()
     for archive in archives:
         pushedtexts.append((archive[0], db.session.query(Pushtext).filter(extract('month', Pushtext.create_time)==archive[0]).all()))
-    return render_template("wechat/pushedtext.html", title="历史推送", posts = pushedtexts)
+    return render_template("wechat/pushedtext.html", title="已推送的文本通知", posts = pushedtexts)
 
 
 @wechat.route('/pushedtext-detail/<int:id>')
 def pushedtext_detail(id):
-    """ 历史推送信息的详情"""
+    """ 推送的文本通知的详情"""
     pushedtext = Pushtext.query.get(id)
     return render_template('wechat/pushedtext_detail.html', pushedtext=pushedtext)
+
+
+
+@wechat.route('/pushimage', methods=['GET', 'POST'])
+def pushimage():
+    """ 推送图片 """
+    pass
+
 
 
 @wechat.route('/upload/',methods=['POST'])

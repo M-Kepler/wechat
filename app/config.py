@@ -50,7 +50,7 @@ class WechatConfig(Config):
     NEWS_THUMB_MEDIA_ID = 'bad_N1NZTEv_2maH7LQ6CEl8yzbTAU0zh8scpIyC6zw'
     NEWS_AUTHOR = ''
     NEWS_DIGEST = "阅读后请后台回复'收到'"
-    NEWS_CONTENT_SOURCE_URL = 'https://www.guet.edu.cn'
+    NEWS_CONTENT_SOURCE_URL = 'http://www.guet.edu.cn'
 
     EncodingAESKey = " "
 

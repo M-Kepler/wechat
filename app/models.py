@@ -194,6 +194,7 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
         else:
             return False
 
+    #  自动分组
     @staticmethod
     def on_created(target, value, oldvalue, initiator):
         target.role= Role.query.filter_by(name='guests').first()
@@ -270,7 +271,7 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-#用户的回调函数
+#  用户的回调函数
 #  把已经登录的用户id放到session里,告诉flask-login怎么看哪些用户已经登录,
 #  然后其他地方需要的时候可以直接通过current_user来获取当前登录用户的信息,如:current_user.name
 #  login_manager验证用户登录成功后会派发cookie到浏览器，用户访问另一个页面的时候

@@ -55,6 +55,11 @@ class WechatUser(db.Model):
         db.session.commit()
         return self
 
+    #  TODO 自动分组
+    @staticmethod
+    def on_created(target, value, oldvalue, initiator):
+        target.role= Role.query.filter_by(name='全体用户').first()
+
 
 class Group(db.Model):
     __tablename__ = 'groups'
@@ -63,5 +68,10 @@ class Group(db.Model):
     pushnews= db.relationship('Pushnews', backref='to_group')
     pushtext = db.relationship('Pushtext', backref='to_group')
 
+    @staticmethod
+    def seed(): #  调用这个方法就可以设置Role的默认值了
+        #  db.session.add_all(map(lambda r:Role(name=r), ['guests', 'administrators']))
+        db.session.add_all(map(lambda r:Group(name=r), ['全体用户']))
+        db.session.commit()
 
 
