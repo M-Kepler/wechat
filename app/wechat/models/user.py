@@ -72,7 +72,7 @@ class Group(db.Model):
     @staticmethod
     def seed(): #  调用这个方法就可以设置Role的默认值了
         #  db.session.add_all(map(lambda r:Role(name=r), ['guests', 'administrators']))
-        db.session.add_all(map(lambda r:Group(name=r), ['全体用户']))
+        db.session.add_all(map(lambda r:Group(name=r), ['全体用户', '就业信息', '学术报告']))
         db.session.commit()
 
 

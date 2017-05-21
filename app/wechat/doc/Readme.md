@@ -307,6 +307,7 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 * 方倍工作室有个图文编辑器,写好后直接复制过去应该行了
 
 
+
 # 清单
 
 
@@ -328,7 +329,7 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 
 1. 明明绑定成功了,但却还是显示失败而且没有失败信息(/func_plugins/score.py)下的
 `redis_auth_prefix = "wechat:user:auth:score:"`
-
+* XXX 但是还没做根据设置分组这点
 
 ## DONE
 
@@ -357,6 +358,9 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 * 原因是,我只有一个图文消息然后构建的格式是:articles = {...},而正确的应该是articles = [{...}], 看了源码才知道...
 * 添加图文素材接口:client.material.add_articles
 ```
+* 用户可以自己设置愿意接受哪些通知了
+用户点击setting链接后,选择自己愿意接受的通知(checkbox)然后后端通过getlist获取到用户已选项,保存这个list到数据库(保存方法和保存用户id的list到to_confirmed一样)
+当用户再次点击设置时,用户曾经的设置会回显出来,做法是从数据库找出user_setting字段(是一个list)把它转str,然后传递给js,js根据str把对应id的checkbox勾选上
 
 ## XXX
 
