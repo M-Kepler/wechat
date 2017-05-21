@@ -329,7 +329,7 @@ Request实例对象中包含了**关于一次HTTP请求的一切信息**, 常用
 
 1. 明明绑定成功了,但却还是显示失败而且没有失败信息(/func_plugins/score.py)下的
 `redis_auth_prefix = "wechat:user:auth:score:"`
-* XXX 但是还没做根据设置分组这点
+* XXX 但是还没做根据设置分组这点, 而且之前设置了如果这个分组下的用户没有人的话,就会删掉这个分组
 
 ## DONE
 

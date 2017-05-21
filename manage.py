@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand, upgrade
 from app import create_app, db
-from app.models import User, Role, Category, Post, Comment
+from app.models import User, Role
 from app.wechat.models.user import WechatUser, Group
 from app.wechat.models.auth import Auth
 from app.wechat.models.pushpost import Pushnews, Pushtext
@@ -28,8 +28,7 @@ def dev():
 #  进入shell调试的时候每次都要导入db,models太麻烦了,
 #  所以配置一下shell命令的上下文,就可以在shell里用了,不用每次都导入
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Post=Post, Comment=Comment, Category=Category,
-            WechatUser=WechatUser,Group = Group, Auth=Auth,Pushnews= Pushnews, Pushtext = Pushtext, init_wechat_sdk = init_wechat_sdk)
+    return dict(app=app, db=db, User=User, Role=Role, WechatUser=WechatUser,Group = Group, Auth=Auth,Pushnews= Pushnews, Pushtext = Pushtext, init_wechat_sdk = init_wechat_sdk)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 
@@ -104,7 +103,7 @@ def create_user(name, email, password):
     role = Role.query.filter_by(name='administrators').first()
     if role is None:
         role = Role()
-        role.name = 'administrator'
+        role.name = 'administrators'
     user.role = role
     db.session.add(user)
     db.session.commit()

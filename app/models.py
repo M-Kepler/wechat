@@ -13,139 +13,9 @@ from sqlalchemy import func, extract
 
 
 registrations= db.Table('registrations',
-        db.Column('post_id', db.Integer, db.ForeignKey('posts.id')),
-        db.Column('category_id.id', db.Integer, db.ForeignKey('categorys.id')),
         db.Column('user_openid', db.Integer, db.ForeignKey('wechatusers.id')),
         db.Column('user_groupid', db.Integer, db.ForeignKey('groups.id'))
         )
-
-class Post(db.Model):
-    __tablename__ = 'posts'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(64))
-    body = db.Column(db.Text)
-    body_html = db.Column(db.Text) #  把markdown原文格式成html存到数据库，而不是访问时在格式
-    create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    comments = db.relationship('Comment', backref='post')
-    read_count = db.Column(db.Integer, default=0)
-    private = db.Column(db.Boolean, default=False)
-
-#  TODO 多对多
-    categorys = db.relationship('Category', secondary = registrations,
-            backref = db.backref('posts', lazy='dynamic'),
-            lazy = 'dynamic')
-
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    #  category_id = db.Column(db.Integer, db.ForeignKey('categorys.id'))
-
-    @staticmethod
-    def on_body_changed(target, value, oldvalue, initiator):
-        target.category= Category.query.filter_by(name='others').first()
-        allow_tags=['a','abbr','acronym','b','blockquote','code', 'em',
-                'i','li','ol','pre','strong','ul', 'h1','h2','h3','p','img']
-        #  转换markdown为html, 并清洗html标签
-        if value is None or (value is ''):
-            target.body_html = ''
-        else:
-            target.body_html=bleach.linkify(bleach.clean(
-                markdown(value,output_form='html'),
-                tags=allow_tags,strip=True,
-                attributes={
-                    '*': ['class'],
-                    'a': ['href', 'rel'],
-                    'img': ['src', 'alt'],#支持<img src …>标签和属性
-                    }
-                ))
-
-#  生成测试数据
-    @staticmethod
-    def generate_fake(count=100):
-        from random import seed, randint
-        import forgery_py
-        seed()
-        user_count = User.query.count()
-        category_count = Category.query.count()
-        for i in range(count):
-            #  offset查询过滤器会跳过阐述中指定的查询数量,通过设定一个随机的偏移值
-            #  调用first()来使得每次获取到一个不同的随机用户
-            category_1 = Category.query.offset(randint(0, category_count-1)).first()
-            category_2 = Category.query.offset(randint(0, category_count-1)).first()
-            u = User.query.offset(randint(0, user_count-1)).first()
-            p = Post(
-                    categorys=[category_1, category_2],
-                    title = forgery_py.lorem_ipsum.title(randint(1,3)),
-                    body = forgery_py.lorem_ipsum.sentences(randint(1,3)),
-                    create_time=forgery_py.date.date(True),
-                    author = u,
-                    read_count = randint(1, 10000)
-                    )
-
-    def getdate(self):
-       data = db.session.query(extract('month', self.create_time).label('month')).first()
-       return data[0]
-       #  return db.func.extract('month', self.create_time)
-
-db.event.listen(Post.body, 'set', Post.on_body_changed)# 当body被修改时触发
-
-
-
-class Category(db.Model):
-    __tablename__ = 'categorys'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
-
-    @staticmethod
-    def seed():
-        db.session.add_all(map(lambda r:Category(name=r), ['others', 'python','linux']))
-        db.session.commit()
-
-    @staticmethod
-    def generate_fake(count=20):
-        from sqlalchemy.exc import IntegrityError
-        from random import seed
-        import forgery_py
-        seed()
-        for i in range(count):
-            c = Category(name=forgery_py.internet.user_name(True))
-            db.session.add(c)
-
-
-
-class Comment(db.Model):
-    __tablename__='comments'
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.Text)
-    body_html = db.Column(db.Text) #  把markdown原文格式成html存到数据库，而不是访问时在格式
-    create_time= db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))# 表示该列的值是posts表的id
-
-    @staticmethod
-    def on_body_changed(target, value, oldvalue, initiator):
-        if value is None or (value is ''):
-            target.body_html = ''
-        else:
-            target.body_html= markdown(value)
-
-    @staticmethod
-    def generate_fake(count=100):
-        from random import seed, randint
-        import forgery_py
-        seed()
-        user_count = User.query.count()
-        post_count = Post.query.count()
-        for i in range(count):
-            p = Post.query.offset(randint(0, post_count-1)).first()
-            u = User.query.offset(randint(0, user_count-1)).first()
-            c = Comment(
-                    body = forgery_py.lorem_ipsum.sentences(randint(1,3)),
-                    create_time=forgery_py.date.date(True),
-                    author = u,
-                    post = p
-                    )
-db.event.listen(Comment.body, 'set', Comment.on_body_changed)# 当body被修改时触发
-
-
 
 
 class Role(db.Model):
@@ -178,11 +48,9 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
     about_me = db.Column(db.Text())
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id')) # 表示该列的值是role表的id
 
-    posts = db.relationship('Post', backref='author')
     pushtext = db.relationship('Pushtext', backref='author')
     pushnews= db.relationship('Pushnews', backref='author')
 
-    comments = db.relationship('Comment', backref='author')
 
     def ping(self):
         self.last_seen = datetime.utcnow()

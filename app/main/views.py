@@ -3,9 +3,9 @@ from flask import flash, session, request, Response, render_template, url_for, r
 from os import path
 from . import main
 from .. import db
-from ..models import User, Role, Post, Comment, Category
+from ..models import User, Role
 from flask_login import login_required, current_user
-from .forms import CommentForm, PostForm, EditProfileForm, EditProfileAdminForm, SearchForm
+from .forms import EditProfileForm, EditProfileAdminForm, SearchForm
 from ..config import DevelopmentConfig as config
 from sqlalchemy import extract, func
 from datetime import datetime
@@ -19,27 +19,10 @@ basepath = path.abspath(path.dirname(__file__))
 @main.route('/', methods=['GET', 'POST'])
 @main.route('/index', methods=['GET', 'POST'])
 def index():
-    posts = Post.query.all()
-    page_index = request.args.get('page', 1, type=int)
-    pagination = Post.query.order_by(
-            Post.create_time.desc()).paginate(
-                    page_index, per_page = config.PER_POSTS_PER_PAGE,
-                    error_out=False)
-    posts=pagination.items
-
-    categorys = Category.query.order_by(Category.id)[::-1] # 所有标签返回的是一个元组
-    # 如果分类下的文章数为0, 就删掉这个分类
-    for c in categorys:
-        p = c.posts.all()
-        if len(p) == 0: # 该分类下的文章数为0
-            db.session.delete(c)
-
-    #TODO 每个分类下的文章总数, 好像有必要分开分类和标签了
-    return render_template('index.html', title = 'M-Kepler', posts = posts,
-            categorys = categorys, pagination = pagination, current_time = datetime.utcnow())
+    return redirect(url_for('wechat.user'))
 
 
-    #  @app.route('/user/<int: user_id>')
+#  @app.route('/user/<int: user_id>')
 #  @app.route('/user/<regex("[a-z]+"):name>')
 @main.route('/user/<name>')
 def user(name):
@@ -47,34 +30,6 @@ def user(name):
     if user is None:
         abort(404)
     return render_template('user.html', user=user)
-
-
-@main.route('/posts/<int:id>', methods = ['GET','POST'])
-def post(id):
-    post = Post.query.get_or_404(id)
-    form = CommentForm()
-    if post.private and not current_user.is_administrator():
-        flash("Sorry This is Personal Article.")
-        return page_not_found(Exception("Not allowed to read"))
-    post.read_count += 1
-
-    #  保存评论
-    if form.validate_on_submit():
-        if current_user.is_anonymous:
-            flash("PLEASE SIGNIN BEFORE COMMENT.")
-            return redirect(url_for('auth.signin'))
-        else:
-            comment = Comment( author_id = current_user.id, body = form.body.data, post = post)
-            db.session.add(comment)
-            flash('COMMENT PUBLISHED.')
-            return redirect(url_for('.post', id=post.id, page=-1))
-    comment_count = len(post.comments)
-
-    form.body.data = ''
-    categorys = Category.query.order_by(Category.id)[::-1] # 所有标签返回的是一个元组
-    return render_template('posts/detail.html', title='M-Kepler | ' + post.title, form=form, post=post,
-            categorys=categorys, comment_count = comment_count)
-
 
 
 #  定义一个装饰器, 修饰只有管理员才能访问的路由
@@ -99,137 +54,6 @@ def str_to_obj(new_category):
             c.append(category_obj)
     return category_obj
 
-
-@main.route('/edit', methods = ['GET', 'POST'])
-@main.route('/edit/<int:id>', methods = ['GET','POST'])
-@login_required
-@admin_required
-def edit(id=0):
-    form = PostForm()
-    if id == 0: # 新增, current_user当前登录用户
-        post = Post(author_id = current_user.id)
-    else:
-        post = Post.query.get_or_404(id)
-
-    if form.validate_on_submit():
-        categoryemp = []
-        category_list = form.category.data.split(',')
-        # 如果已经有这个分类就不用创建
-        for t in category_list:
-            tag = Category.query.filter_by(name=t).first()
-            if tag is None:
-                tag = Category()
-                tag.name = t
-                #  tag.save()
-            categoryemp.append(tag)
-        post.categorys = categoryemp
-        post.title = form.title.data
-        post.body = form.body.data
-
-        post.private = form.private.data
-        post.read_count = 0
-
-        db.session.add(post)
-        db.session.commit()
-        db.session.rollback()
-        return redirect(url_for('.post', id=post.id))
-
-    form.title.data = post.title
-    #  form.body.data = post.body
-    body_value= post.body
-
-    #  form.category.data = [i.name for i in post.categorys]
-    #  value = [i.name for i in post.categorys]
-    # TODO ☆ 为了把值传到input标签,我也没其他方法了, 然后将category的list元素用‘,’分割组成str传给input
-
-    value = ",".join([i.name for i in post.categorys])
-
-    mode='编辑' if id>0 else '添加'
-    return render_template('posts/edit.html', title ='%s - %s' % (mode, post.title), form=form,
-            post=post, value=value, body_value = body_value)
-
-
-@main.route('/posts/delete/<int:id>', methods = ['GET','POST'])
-@login_required
-def deletepost(id):
-    post = Post.query.get_or_404(id)
-    db.session.delete(post)
-    for comment in post.comments:
-        db.session.delete(comment)
-#   如果分类下没有文章了就删掉这个分类
-    for category in post.categorys.all():
-        if category.posts.all() is None:
-            db.session.delete(category)
-    flash('POST DELETED')
-    return redirect(url_for('.index'))
-
-
-# FIXME 评论删除后显示的是当前这篇文章啊
-@main.route('/comment_delete/<int:id>', methods=['GET', 'POST'])
-@login_required
-def comment_delete(id):
-    comment = Comment.query.get_or_404(id)
-    post_id = comment.post_id
-    db.session.delete(comment)
-    flash('COMMENT DELETED')
-    return redirect(url_for('.post', id=post_id))
-
-
-@main.route('/category/<name>', methods=['GET', 'POST'])
-def category(name):
-    #  点击index的标签后跳到这里,顺便把标签名传了过来,
-    #  index视图那里也不需要进行查询,因为做了外键,直接可以有posts知道category
-    categorys = Category.query.order_by(Category.id)[::-1] # 右侧需要显示的所有标签
-    category = Category.query.filter_by(name = name).first() # name对应的标签对象
-    page_index = request.args.get('page', 1, type=int)
-
-    #  pagination = Post.query.filter(Post.categorys == category).order_by(
-    pagination = category.posts.order_by(Post.create_time.desc()).paginate(
-                    page_index, per_page = config.PER_POSTS_PER_PAGE,
-                    error_out=False)
-    posts=pagination.items
-    return render_template("category.html",title='M-Kepler|分类|' + name, name=name, posts=posts, categorys=categorys, pagination=pagination)
-
-
-# 分类管理
-@main.route('/category_manager', methods=['GET', 'POST'])
-def category_manager():
-    return "category_manager test"
-
-
-@main.route('/category/delete<int:id>', methods=['GET', 'POST'])
-@admin_required
-@login_required
-def category_delete(id):
-    category = Category.query.get_or_404(id)
-    db.session.delete(category)
-    '''
-    分来下的文章也删除吗?还是自动划分到other分类下?
-    for comment in post.comments:
-        db.session.delete(comment)
-    '''
-    flash('该分类已删除')
-    return redirect(url_for('.index'))
-
-
-@main.route('/category/edit<int:id>', methods=['GET', 'POST'])
-@admin_required
-@login_required
-def category_edit(id=0):
-    pass
-
-
-@main.route('/archive')
-def archive():
-    #  返回一个元素是tuple的列表[(10, 32), (11, 23), (12, 1)] #  tuple第一个关键码标识月份，第二个标识数量 #  我试了试提取year, 会出错
-    archives = db.session.query(extract('month', Post.create_time).label('month'),
-            func.count('*').label('count')).group_by('month').all()
-
-    posts=[]
-    for archive in archives:
-        posts.append((archive[0], db.session.query(Post).filter(extract('month', Post.create_time)==archive[0]).all()))
-
-    return render_template('archive.html',title='M-Kepler | ARCHIVE', posts=posts)
 
 @main.route('/about')
 def about():
@@ -293,52 +117,3 @@ def page_not_found(e):
 @main.errorhandler(500)
 def internal_server_error(e):
     return render_template('error.html', code=500, e=e), 500
-
-
-@main.route('/upload/',methods=['POST'])
-def upload():
-    """ 处理图片上传 """
-    file=request.files.get('editormd-image-file')
-    if not file:
-        res={
-            'success':0,
-            'message':u'图片格式异常'
-        }
-    else:
-        ex=path.splitext(file.filename)[1] # 获取文件扩展名
-        filename=datetime.now().strftime('%Y%m%d%H%M%S')+ex # 根据时间戳组装文件名
-        file_path = path.join(current_app.config['SAVEPIC'], filename)
-        file.save(file_path)
-        wechat = init_wechat_sdk()
-        client = wechat['client']
-        #  把图片上传到本地, 然后上传到微信, 得到url
-        with open(path.join(current_app.config['SAVEPIC'], filename),'rb') as f:
-            url = client.media.upload_mass_image(f)
-
-        #  delete_dir()
-        #  'url':url_for('.image', name = filename)
-        res={
-            'success':1,
-            'message':u'图片上传成功',
-            'url':url
-        }
-    return jsonify(res)
-
-
-@main.route('/image/<name>')
-def image(name):
-    """ 编辑器上传图片处理, 将要插入的图片的地址
-    #  file.save(path.join(current_app.config['SAVEPIC'],filename))
-    #  wechat = init_wechat_sdk()
-    #  client = wechat['client']
-    #  res = client.media.upload('image', file_path)
-    #  media_id = res['media_id']
-    #  image = client.media.download(media_id)
-    #  url = client.media.get_url(media_id)
-    #  下载显示图片, response对象
-    """
-    with open(path.join(current_app.config['SAVEPIC'],name),'rb') as f:
-        resp = Response(f.read(),mimetype="image/jpeg")
-    return resp
-
-

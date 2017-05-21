@@ -3,7 +3,7 @@
 #  from flask_wtf import Form
 from flask_wtf import FlaskForm as Form
 
-from ..models import Category, Role
+from ..models import Role
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms import StringField, SelectField, BooleanField, TextAreaField, SubmitField, validators, ValidationError
 from wtforms.validators import DataRequired, length, Regexp, EqualTo, Email
