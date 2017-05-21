@@ -142,16 +142,22 @@ def auth_library_result(openid=None):
 #  不用oauth授权的话, 只能传openid参数了
 #  @wechat.route('/setting/<openid>', methods=['GET', 'POST'])
 #  @oauth_request
-@wechat.route('/setting', methods=['GET', 'POST'])
+@wechat.route('/setting/<openid>', methods=['GET', 'POST'])
 def setting(openid=None):
+    user = WechatUser.query.filter_by(openid=openid).first()
     if request.method == 'POST':
-        #TODO  这个openid_list的值只能设置一次,这里每更改一次这个list都会更改,看看人家怎么实现的
-        values = request.form.getlist('check')
-        aaaa = openid_list(openid, values)
-        print(aaaa)
-        return 'success'
+        setting_list = request.form.getlist('setting')
+        user.user_setting = json.dumps(setting_list)
+        user.update()
+        print(setting_list)
+        return 'success' #  显示一个Toast后, 关闭窗口
     else:
-        return render_template('wechat/setting.html')
+        if user.user_setting:
+            setting_list = json.loads(user.user_setting)
+            setting_list = ','.join(setting_list)
+        else:
+            setting_list = []
+        return render_template('wechat/setting.html', values = setting_list)
 
 
 @wechat.route('/phonenumber', methods=['GET'])

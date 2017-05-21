@@ -25,16 +25,16 @@
         <div class="weui-cells weui-cells_form">
 
           <div class="weui-cell weui-cell_switch">
-            <div class="weui-cell__bd">学院通知</div>
+            <div class="weui-cell__bd">其他通知</div>
             <div class="weui-cell__ft">
-              <input class="weui-switch" type="checkbox" name="check" value="academy"/>
+              <input class="weui-switch" type="checkbox" name="setting" value="1"/>
             </div>
           </div>
 
           <div class="weui-cell weui-cell_switch">
             <div class="weui-cell__bd">就业信息</div>
             <div class="weui-cell__ft">
-              <input class="weui-switch" type="checkbox" name="check" value="interview" />
+              <input class="weui-switch" type="checkbox" name="setting" value="2" />
             </div>
           </div>
 
@@ -42,10 +42,11 @@
             <div class="weui-cell__bd">学术报告</div>
             <div class="weui-cell__ft">
               <label>
-                <input class="weui-switch" type="checkbox" name="check" value="report"/>
+                <input class="weui-switch" type="checkbox" name="setting" value="3"/>
               </label>
             </div>
           </div>
+
         </div>
 
         <div class="weui_cells_title">根据需要,选择对应的功能</div>
@@ -79,5 +80,12 @@
 
     </div>
   </body>
+<script>
+    var s ='{{values}}';
+    s=','+s+',';//前后加限定符
+    var cb = document.getElementsByName('setting');//这里改你checkbox的name值
+    for (var i = 0; i < cb.length; i++)
+        if (s.indexOf(',' + cb[i].value + ',') != -1) cb[i].checked = true;
+</script>
 
 </html>

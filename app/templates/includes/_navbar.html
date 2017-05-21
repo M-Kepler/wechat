@@ -18,12 +18,12 @@
       <div class="navbar-collapse collapse"
         id="7bc75dbef69e41ff2452de70079c8ece1320ea7c">
         <ul class="nav navbar-nav">
-          <li {% if url_for('main.index') is current_link %}class="active"{% endif %}>
-            <a href="{{ url_for('main.index') }}" title="{{ ("HOME") }}">{{ ("HOME") }}</a>
+          <li {% if url_for('wechat.pushednews') is current_link %}class="active"{% endif %}>
+            <a href="{{ url_for('wechat.pushednews') }}" title="{{ ("已推送的图文") }}">{{ ("已推送的图文") }}</a>
           </li>
           <!-- 根据日期group_by -->
           <li {% if url_for('wechat.pushedtext') is current_link %}class="active"{% endif %}>
-            <a href="{{ url_for('wechat.pushedtext') }}" title="{{ ("历史推送") }}">{{ ("历史通知") }}</a>
+            <a href="{{ url_for('wechat.pushedtext') }}" title="{{ ("已推送的文本") }}">{{ ("已推送的文本") }}</a>
           </li>
 
           {% if current_user.is_administrator() %}
@@ -33,8 +33,6 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="/edit">添加新文章</a></li>
-              <li class="divider"></li>
               <li><a href="{{ url_for('wechat.push') }}">添加推送</a></li>
               <li class="divider"></li>
               <li><a href="{{ url_for('wechat.user') }}">用户管理</a></li>

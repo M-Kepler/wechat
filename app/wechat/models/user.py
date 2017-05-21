@@ -21,9 +21,10 @@ class WechatUser(db.Model):
     country = db.Column(db.String(20), nullable=True)
     headimgurl = db.Column(db.String(150), nullable=True)
     regtime = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    user_setting = db.Column(db.String(100))
 
     user_group = db.relationship('Group', secondary=registrations,
-            backref = db.backref('wechatusers', lazy='dynamic'), 
+            backref = db.backref('wechatusers', lazy='dynamic'),
             lazy = 'dynamic')
 
     #  phone_number = db.Column(db.String(32), nullable=True)
