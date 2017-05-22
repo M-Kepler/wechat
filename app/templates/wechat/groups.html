@@ -48,7 +48,8 @@
 							<td>
 								{% for group in user.user_group%}
                 <a href="{{ url_for('wechat.group', name = group.name) }}">
-                  <span class="label label-primary text-left" id="group"> {{group.name}} </span>
+                  <button class= "btn btn-sm" data-toggle = "modal" data-target = "#update">
+                    <span class="glyphicon glyphicon-tag" aria-hidden="true">{{group.name}}</button>
                 </a>
 								&nbsp &nbsp
 								{% endfor %}

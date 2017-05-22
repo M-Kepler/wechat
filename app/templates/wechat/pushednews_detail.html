@@ -34,27 +34,69 @@
                     <small><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>
                       {{ moment(pushednews.create_time).format('YYYY.M.D-HH:mm:ss') }}
                     </small>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <hr/>
+              <hr/>
 
-            <!-- 显示标签,点击标签显示该标签下的文章 -->
-              <span style:"float:left"> 这条消息发给:(点击查看该分组成员) </span>
-              <a href="{{ url_for('wechat.group', name = pushednews.to_group.name) }}">
-                <span style:"float:right" class="label label-primary text-left"> <span class="glyphicon glyphicon-tag" aria-hidden="true">
-              </span> {{pushednews.to_group.name}}</span></a>
-            </div>
+              <div>
+                <table class="table table-hover" id="cusTable"
+                  data-pagination="true"
+                  data-show-refresh="true"
+                  data-show-toggle="true"
+                  data-showColumns="true">
+                  <thead>
+                    <tr>
+                      <th  data-field="sellRecordId" data-sortable="true">
+                        id
+                      </th>
+                      <th data-field="srNumber" >
+                        作者
+                      </th>
+                      <th data-field="srNumber" >
+                        标题
+                      </th>
+                      <th data-field="srNumber" >
+                        创建时间
+                      </th>
+                      <th data-field="srNumber" >
+                        所发给分组
+                      </th>
+                      <th data-field="srNumber" >
+                        未确认收到的用户
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td> {{pushednews.id}} </td>
+                      <td>{{pushednews.author.name}}</td>
+                      <td>{{pushednews.title}}</td>
+                      <td>{{pushednews.create_time}}</td>
+                      <td>
+                        <a href="{{ url_for('wechat.group', name = pushednews.to_group.name) }}">
+                          <span style:"float:right" class="label label-primary text-left"> <span class="glyphicon glyphicon-tag" aria-hidden="true">
+                        </span> {{pushednews.to_group.name}}</span></a>
+                      </td>
+                      <td>{{unconfirmed_name}}</td>
+                      <!-- <td>{ {pushednews.to_confirmed}}</td> -->
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
             </div>
           </div>
-      </div>
+        </div>
 
 
-      {% endblock	%}
+        {% endblock	%}
 
-      {% block scripts %}
-      {{ super() }}
-      <!-- 预览markdown -->
-      {{ pagedown.include_pagedown() }}
-      {% endblock %}
+        {% block scripts %}
+        {{ super() }}
+        <!-- 预览markdown -->
+        {{ pagedown.include_pagedown() }}
+        {% endblock %}

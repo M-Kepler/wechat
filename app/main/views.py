@@ -5,7 +5,7 @@ from . import main
 from .. import db
 from ..models import User, Role
 from flask_login import login_required, current_user
-from .forms import EditProfileForm, EditProfileAdminForm, SearchForm
+from .forms import EditProfileForm, EditProfileAdminForm
 from ..config import DevelopmentConfig as config
 from sqlalchemy import extract, func
 from datetime import datetime
@@ -19,7 +19,10 @@ basepath = path.abspath(path.dirname(__file__))
 @main.route('/', methods=['GET', 'POST'])
 @main.route('/index', methods=['GET', 'POST'])
 def index():
-    return redirect(url_for('wechat.user'))
+    if not current_user.is_anonymous and current_user.confirmed:
+        return redirect(url_for('wechat.user'))
+    else:
+        return redirect(url_for('auth.signin'))
 
 
 #  @app.route('/user/<int: user_id>')
@@ -58,16 +61,6 @@ def str_to_obj(new_category):
 @main.route('/about')
 def about():
     return render_template('about.html', title='M-Kepler | ABOUT')
-
-@main.route('/search', methods=['GET', 'POST'])
-def search():
-    return 'test'
-
-
-@main.before_app_request
-def before_request():
-    #  if current_user.is_authenticated: #  全文搜索,让这个搜索框
-    g.search_form = SearchForm()
 
 
 @main.route('/edit-profile', methods=['GET','POST'])
@@ -117,3 +110,4 @@ def page_not_found(e):
 @main.errorhandler(500)
 def internal_server_error(e):
     return render_template('error.html', code=500, e=e), 500
+

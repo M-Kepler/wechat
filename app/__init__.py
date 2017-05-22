@@ -33,6 +33,7 @@ pagedown = PageDown()
 login_manager = LoginManager()
 login_manager.session_protection='strong'
 login_manager.login_view = 'auth.signin'
+login_manager.login_message = u'访问此页面之前, 请先登录'
 
 basedir = path.abspath(path.dirname(__file__))
 

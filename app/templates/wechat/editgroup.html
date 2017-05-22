@@ -4,7 +4,6 @@
 {{super()}}
 {% endblock %}
 
-
 {% block styles %}
 {{super()}}
 {% endblock %}
@@ -16,11 +15,14 @@
   <div class="form-group" required>
     <div class= "raw">
       <div clas= "col-md-6">
-        用户{{user.realname}} 的分组：
+        <label class= "control-label" for "title"> 用户{{user.nickname}} 的分组：</label>
         <input id="group" name="group" value="{{value}}" type="text" data-role="tagsinput"/>
         <div style="float:right "> {{ form.submit(class="btn btn-primary") }} </div>
       </div>
     </div>
   </div>
 </form>
+{% endblock %}
+{% block scripts%}
+{{ super() }}
 {% endblock %}

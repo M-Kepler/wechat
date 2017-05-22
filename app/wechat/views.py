@@ -19,6 +19,16 @@ from .form import GroupForm, NewsForm, TextForm
 from .utils import check_wechat_signature, get_jsapi_signature_data,\
         oauth_request, openid_list, init_wechat_sdk
 
+from functools import wraps
+def admin_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        if current_user.is_administrator():
+            return f(*args, **kwargs)
+        else:
+            abort(403)
+    return decorator
+
 
 @wechat.route('/test')
 def test():
@@ -109,21 +119,6 @@ def school_report_card(openid=None):
         abort(404)
 
 
-@wechat.route('/auth-library/<openid>', methods=['GET', 'POST'])
-def auth_library(openid=None):
-    """ 绑定图书馆帐号
-    XXX 图书馆这个先不做了吧
-    """
-    if request.method == 'POST':
-        libraryid = request.form.get('libraryid', '')
-        librarypwd = request.form.get('librarypwd', '')
-        if libraryid and librarypwd and is_user_exists(openid):
-            errmsg = 'ok'
-            pass
-        else:
-            errmsg = '卡号或密码不正确'
-
-
 @wechat.route('/auth-library/<openid>/result', methods=['GET'])
 def auth_library_result(openid=None):
     """查询借书卡绑定结果"""
@@ -167,6 +162,7 @@ def phone_number():
 
 
 @wechat.route('/user')
+@login_required
 def user():
     """ 用户列表 """
     users = WechatUser.query.all()
@@ -179,6 +175,8 @@ def user():
 
 
 @wechat.route('/editgroup/<int:id>', methods = ['GET','POST'])
+@login_required
+@admin_required
 def editgroup(id=0):
     """ 修改用户分组 """
     form = GroupForm()
@@ -210,6 +208,8 @@ def group(name):
 
 
 @wechat.route('/push', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def push():
     """ 推送图文消息"""
     newsform = NewsForm()
@@ -285,6 +285,7 @@ def push():
 
 
 @wechat.route('/pushednews', methods=['GET', 'POST'])
+@login_required
 def pushednews():
     """ 历史推送的图文通知 """
     pushednews = []
@@ -296,18 +297,28 @@ def pushednews():
 
 
 @wechat.route('/pushednews-detail/<int:id>')
+@login_required
 def pushednews_detail(id):
     """ 推送的图文通知的详情"""
     pushednews = Pushnews.query.get(id)
     media_id = pushednews.media_id
     wechat = init_wechat_sdk()
     client = wechat['client']
-    get_material = client.material.get(media_id)
-    url = get_material[0]['url']
-    return render_template('wechat/pushednews_detail.html', url=url, pushednews=pushednews)
+    #  get_material = client.material.get(media_id)
+    #  url = get_material[0]['url']
+    url = "www.baidu.com"
+    unconfirmed_id = pushednews.to_confirmed
+    unconfirmed_name = []
+    to_confirmed = json.loads(unconfirmed_id)
+    for user_id in to_confirmed:
+        user = WechatUser.query.filter_by(id=user_id).first()
+        unconfirmed_name = unconfirmed_name.append(user.realname)
+    return render_template('wechat/pushednews_detail.html', unconfirmed_name = unconfirmed_name, url=url, pushednews=pushednews)
 
 
 @wechat.route('/pushtext', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def pushtext():
     """ 推送文字信息 """
     form = TextForm()
@@ -364,9 +375,8 @@ def pushtext():
     return redirect(url_for('wechat.user'))
 
 
-
-
 @wechat.route('/pushedtext', methods=['GET', 'POST'])
+@login_required
 def pushedtext():
     """ 历史推送的文本通知 """
     pushedtexts = []
@@ -378,6 +388,7 @@ def pushedtext():
 
 
 @wechat.route('/pushedtext-detail/<int:id>')
+@login_required
 def pushedtext_detail(id):
     """ 推送的文本通知的详情"""
     pushedtext = Pushtext.query.get(id)
