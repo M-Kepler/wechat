@@ -117,13 +117,14 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                     if idx != 0:
                         tds = tr.find_all('td')
                         term = tds[0].contents[0]
+                        lesson_name = tds[1].contents[0]
+                        score = tds[3].contents[0]
                         if term == school_term:
-                            lesson_name = tds[1].contents[0]
-                            score = tds[3].contents[0]
-                            # 组装文本格式数据回复用户
-                            content = content + u'课程名称：%s\n考试成绩：%s\n\n' % (
-                                    lesson_name, score)
-                            # 组装数组格式的数据备用
+                            # 组装当前学期成绩文本格式数据回复用户
+                            content = content + u'课程名称：%s\n考试成绩：%s\n\n' % (lesson_name, score)
+                            score_info.append({"term":term, "lesson_name": lesson_name, "score":score})
+                        else:
+                            # 组装所有学期成绩数组格式的数据备用
                             score_info.append({"term":term, "lesson_name": lesson_name, "score": score})
 
                 # 查询不到成绩
@@ -141,7 +142,7 @@ def get_info(openid, studentid, studentpwd, check_login=False):
                         'description':'',
                         'url':url
                     }, {
-                        'title':'点击这里分享',
+                        'title':'点击查看全部学期的成绩',
                         'description':'',
                         'url':url
                     } ]
