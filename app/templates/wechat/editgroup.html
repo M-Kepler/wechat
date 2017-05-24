@@ -13,16 +13,15 @@
 <form action ="" method="POST" class="form" role="form">
   {{ form.hidden_tag() }}
   <div class="form-group" required>
+
     <div class= "raw">
       <div clas= "col-md-6">
-        <label class= "control-label" for "title"> 用户{{user.nickname}} 的分组：</label>
-        <input id="group" name="group" value="{{value}}" type="text" data-role="tagsinput"/>
+        <label class= "control-label" for="title"> 用户{{user.realname}} 的分组：</label>
+        <input class= "form-control" style = "width:300px" id="group" name="group" value="{{value}}" type="text" data-role="tagsinput"/>
         <div style="float:right "> {{ form.submit(class="btn btn-primary") }} </div>
       </div>
     </div>
+
   </div>
 </form>
-{% endblock %}
-{% block scripts%}
-{{ super() }}
 {% endblock %}

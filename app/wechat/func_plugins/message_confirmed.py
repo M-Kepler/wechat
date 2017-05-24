@@ -29,13 +29,10 @@ def confirmed(openid):
 
     if pushtype == 'text':
         pushtext = Pushtext.query.filter_by(media_id=media_id).first()
-        #  FIXME  to_confirmed可以从last_push_text缓存中获得
         to_confirmed_before = pushtext.to_confirmed
         content = pushtext.content
-        #  FIXME  如果推送的是图文的话这里应该显示的是标题
-        #  这里我是把list转为json村到数据库,所以去出来的时候要转回来
+        #  这里我是把list转为json存到数据库,所以去出来的时候要转回来
         to_confirmed = json.loads(to_confirmed_before)
-        current_app.logger.warning('to_confirmed_应该是个list %s' % to_confirmed)
         try:
             if user_id in to_confirmed:
                 to_confirmed.remove(user_id)

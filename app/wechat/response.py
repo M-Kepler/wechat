@@ -250,7 +250,7 @@ def setting():
     """ 自定义订阅消息类型 """
     setting_url = app.config['HOST_URL'] + '/setting/' + openid
     #  setting_url = app.config['HOST_URL'] + '/setting'
-    content = '<a href = "%s">［公众号消息设置］</a>' % setting_url
+    content = '<a href = "%s">【点击进入公众号消息设置】"</a>' % setting_url
     reply = create_reply(content, msg)
     return reply.render()
 

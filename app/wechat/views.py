@@ -144,8 +144,8 @@ def setting(openid=None):
         setting_list = request.form.getlist('setting')
         user.user_setting = json.dumps(setting_list)
         user.update()
-        print(setting_list)
-        return 'success' #  显示一个Toast后, 关闭窗口
+       #  TODO 显示一个Toast后, 关闭窗口
+        return 'success'
     else:
         if user.user_setting:
             setting_list = json.loads(user.user_setting)
@@ -167,9 +167,10 @@ def user():
     """ 用户列表 """
     users = WechatUser.query.all()
     groups = Group.query.order_by(Group.id)[::-1] # 所有标签返回的是一个元组
+     # 该分组下用户数为0, 删除这个分组
     for c in groups:
         p = c.wechatusers.all()
-        if len(p) == 0: # 该分类下的文章数为0
+        if len(p) == 0:
             db.session.delete(c)
     return render_template('wechat/user.html', users=users)
 
