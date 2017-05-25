@@ -1,12 +1,5 @@
 {% extends 'base.html' %}
 
-{% block head %}
-{{super()}}
-{% endblock %}
-
-{% block styles %}
-{{super()}}
-{% endblock %}
 
 {% block page_content %}
 {{super()}}
@@ -17,11 +10,10 @@
     <div class= "raw">
       <div clas= "col-md-6">
         <label class= "control-label" for="title"> 用户{{user.realname}} 的分组：</label>
-        <input class= "form-control" style = "width:300px" id="group" name="group" value="{{value}}" type="text" data-role="tagsinput"/>
+        <input class= "form-control" data-role="tagsinput" style = "width:300px" id="group" name="group" value="{{value}}" type="text" />
         <div style="float:right "> {{ form.submit(class="btn btn-primary") }} </div>
       </div>
     </div>
-
   </div>
 </form>
 {% endblock %}
