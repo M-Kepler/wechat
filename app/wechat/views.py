@@ -313,7 +313,10 @@ def pushednews_detail(id):
     to_confirmed = json.loads(unconfirmed_id)
     for user_id in to_confirmed:
         user = WechatUser.query.filter_by(id=user_id).first()
-        unconfirmed_name = unconfirmed_name.append(user.realname)
+        if user.realname:
+            unconfirmed_name.append(user.realname)
+        else:
+            unconfirmed_name.append(user.nickname)
     return render_template('wechat/pushednews_detail.html', unconfirmed_name = unconfirmed_name, url=url, pushednews=pushednews)
 
 

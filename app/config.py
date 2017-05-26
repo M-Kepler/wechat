@@ -65,8 +65,8 @@ class WechatConfig(Config):
     PASSWORD_SECRET_KEY = "HardToGuessKeys."
 
     #  绑定认证URL
-    AUTH_JW_TEXT = '\n<a href = "%s">［未绑定？点击这里绑定学号］</a>\n'
-    AUTH_LIBRARY_TEXT = '\n<a href = "%s">［未来绑定？点击这里绑定图书馆帐号］</a>\n'
+    AUTH_JW_TEXT = '\n<a href = "%s">【未绑定？点击这里绑定学号】</</a>\n'
+    AUTH_LIBRARY_TEXT = '\n<a href = "%s">【未来绑定？点击这里绑定图书馆帐号】</</a>\n'
     #  AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n\n<a href="%s">绑定图书馆帐号</a>\n'
     AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n'
 

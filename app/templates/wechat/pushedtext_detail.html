@@ -39,11 +39,49 @@
 
               <hr/>
 
-              <!-- 显示标签,点击标签显示该标签下的文章 -->
-              <span style:"float:left"> 这条消息发给:(点击查看该分组成员) </span>
-              <a href="{{ url_for('wechat.group', name = pushedtext.to_group.name) }}">
-                <span style:"float:right" class="label label-primary text-left"> <span class="glyphicon glyphicon-tag" aria-hidden="true">
-              </span> {{pushedtext.to_group.name}}</span></a>
+              <div>
+                <table class="table table-hover" id="cusTable"
+                  data-pagination="true"
+                  data-show-refresh="true"
+                  data-show-toggle="true"
+                  data-showColumns="true">
+                  <thead>
+                    <tr>
+                      <th  data-field="sellRecordId" data-sortable="true">
+                        id
+                      </th>
+                      <th data-field="srNumber" >
+                        作者
+                      </th>
+                      <th data-field="srNumber" >
+                        创建时间
+                      </th>
+                      <th data-field="srNumber" >
+                        所发给分组
+                      </th>
+                      <th data-field="srNumber" >
+                        未确认收到的用户
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td> {{pushedtext.id}} </td>
+                      <td>{{pushedtext.author.name}}</td>
+                      <td>{{pushedtext.create_time}}</td>
+                      <td>
+                        <a href="{{ url_for('wechat.group', name = pushedtext.to_group.name) }}">
+                          <span style:"float:right" class="label label-primary text-left"> <span class="glyphicon glyphicon-tag" aria-hidden="true">
+                        </span> {{pushedtext.to_group.name}}</span></a>
+                      </td>
+                      <td>{{unconfirmed_name}}</td>
+                      <!-- <td>{ {pushedtext.to_confirmed}}</td> -->
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             </div>
           </div>
