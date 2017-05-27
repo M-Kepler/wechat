@@ -190,7 +190,6 @@ def editgroup(id=0):
             if tag is None:
                 tag = Group()
                 tag.name = t
-                #  tag.save()
             groupemp.append(tag)
         user.user_group = groupemp
         user.save()
@@ -305,9 +304,9 @@ def pushednews_detail(id):
     media_id = pushednews.media_id
     wechat = init_wechat_sdk()
     client = wechat['client']
-    #  get_material = client.material.get(media_id)
-    #  url = get_material[0]['url']
-    url = "www.baidu.com"
+    get_material = client.material.get(media_id)
+    url = get_material[0]['url']
+    #  url = "www.baidu.com"
     unconfirmed_id = pushednews.to_confirmed
     unconfirmed_name = []
     to_confirmed = json.loads(unconfirmed_id)

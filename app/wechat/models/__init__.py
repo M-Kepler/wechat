@@ -15,7 +15,7 @@ import time
 from app import db, redis
 from flask import current_app
 from wechatpy import WeChatClient
-from .user import WechatUser
+from .user import WechatUser, Group
 from .auth import Auth
 from ..func_plugins.state import get_user_last_interact_time
 from ..utils import init_wechat_sdk
@@ -250,8 +250,8 @@ def set_user_realname_and_classname(openid, realname, classname):
         })
 
 
-def set_user_group(openid, group_name):
-    """ 设置用户分组 """
+def set_user_group_weixin(openid, group_name):
+    """ 设置用户分组(微信) """
     wechat = init_wechat_sdk()
     client = wechat['client']
     user_group= client.group.get(openid)
@@ -259,3 +259,20 @@ def set_user_group(openid, group_name):
         group = client.group.create(group_name)
         group_id = group['group']['id']
         client.group.move_user(openid, group_id)
+
+
+def set_user_group(openid, group_name):
+    """ 自动按照班级分组(数据库) """
+    user = WechatUser.query.filter_by(openid = openid).first()
+    group = Group.query.filter_by(name=group_name).first()
+    #  如果用户的分组不包含班级分组
+    if group_name not in user.user_group:
+        #  如果还没有这个group_name这个分组
+        if group is None:
+            new_group = Group()
+            new_group.name = group_name
+            user.user_group.append(new_group)
+        else:
+            user.user_group.append(group)
+    user.save()
+
