@@ -267,7 +267,7 @@ def set_user_group(openid, group_name):
     group = Group.query.filter_by(name=group_name).first()
     #  如果用户的分组不包含班级分组
     if group_name not in user.user_group:
-        #  如果还没有这个group_name这个分组
+        #  如果数据库中还没有这个group_name分组
         if group is None:
             new_group = Group()
             new_group.name = group_name
@@ -275,4 +275,5 @@ def set_user_group(openid, group_name):
         else:
             user.user_group.append(group)
     user.save()
+
 
