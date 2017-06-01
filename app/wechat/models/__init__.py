@@ -266,7 +266,8 @@ def set_user_group(openid, group_name):
     user = WechatUser.query.filter_by(openid = openid).first()
     group = Group.query.filter_by(name=group_name).first()
     #  如果用户的分组不包含班级分组
-    if group_name not in user.user_group:
+    #  if group_name not in user.user_group:
+    if group not in user.user_group:
         #  如果数据库中还没有这个group_name分组
         if group is None:
             new_group = Group()

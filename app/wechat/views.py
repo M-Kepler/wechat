@@ -134,6 +134,23 @@ def auth_library_result(openid=None):
         abort(404)
 
 
+    """ 修改用户分组 """
+    if form.validate_on_submit():
+        groupemp = []
+        groupemp_list = form.group.data.split(',')
+        for t in groupemp_list:
+            tag = Group.query.filter_by(name=t).first()
+            if tag is None:
+                tag = Group()
+                tag.name = t
+            groupemp.append(tag)
+        user.user_group = groupemp
+        user.save()
+        return redirect(url_for('wechat.user'))
+    value = ",".join([i.name for i in user.user_group])
+    return render_template('wechat/editgroup.html',form=form, user=user, value=value)
+
+
 #  不用oauth授权的话, 只能传openid参数了
 #  @wechat.route('/setting/<openid>', methods=['GET', 'POST'])
 #  @oauth_request
@@ -141,10 +158,21 @@ def auth_library_result(openid=None):
 def setting(openid=None):
     user = WechatUser.query.filter_by(openid=openid).first()
     if request.method == 'POST':
+        #  只是保存了用户的设置的一个列表
         setting_list = request.form.getlist('setting')
         user.user_setting = json.dumps(setting_list)
         user.update()
         #  根据设置给用户分组
+        for i in setting_list:
+            group = Group.query.filter_by(name=i).first()
+            if group not in user.user_group:
+                if group is None:
+                    new_group = Group()
+                    new_group.name = i
+                    user.user_group.append(new_group)
+                else:
+                    user.user_group.append(group)
+            user.save()
         #  TODO 显示一个Toast后, 关闭窗口
         return 'success'
     else:
