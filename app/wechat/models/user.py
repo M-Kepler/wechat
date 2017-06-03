@@ -56,10 +56,19 @@ class WechatUser(db.Model):
         db.session.commit()
         return self
 
-    #  TODO 自动分组
+    #  FIXME  自动分组
     @staticmethod
     def on_created(target, value, oldvalue, initiator):
-        target.role= Role.query.filter_by(name='全体用户').first()
+        group = Group.query.filter_by(name='全体用户').first()
+        if group is None:
+            new_group = Group()
+            new_group.name = '全体用户'
+            #  user.user_group.append(new_group)
+        else:
+            target.user_group = Group.query.filter_by(name='全体用户').first()
+
+#  数据库on_created事件监听 #  每插入新对象就初始化用户的user_group
+db.event.listen(WechatUser.openid, 'set', WechatUser.on_created)
 
 
 class Group(db.Model):
@@ -70,9 +79,17 @@ class Group(db.Model):
     pushtext = db.relationship('Pushtext', backref='to_group')
 
     @staticmethod
-    def seed(): #  调用这个方法就可以设置Role的默认值了
-        #  db.session.add_all(map(lambda r:Role(name=r), ['guests', 'administrators']))
+    def seed():
+        #  XXX  调用这个方法就可以设置Role的默认值了, 这个可以去掉了
         db.session.add_all(map(lambda r:Group(name=r), ['全体用户', '就业信息', '学术报告']))
         db.session.commit()
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        return self
+
+    def update(self):
+        db.session.commit()
+        return self
 

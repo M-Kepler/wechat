@@ -57,9 +57,10 @@ class WechatConfig(Config):
     WELCOME_TEXT = "欢迎关注我的公众号.\n"
     HOST_URL = "http://huangjinjie.ngrok.cc/wechat"
 
-    COMMAND_TEXT = "您可以回复以下关键字:\n---------------\n天气  新闻  歌曲\n测试4  测试5  测试6"
+    COMMAND_TEXT = "您可以回复以下关键字:\n---------------\n天气  新闻  歌曲\n游戏  测试5  测试6"
     COMMAND_NOT_FOUND = "\n后台已收到您的留言!"
     HELP_TEXT = u"\n\n回复' ? '查看帮助信息\n"
+    HTML5_GAMES = u'<a href="http://autobox.meiriq.com/list/302da1ab?from=gxgkcat">开始玩游戏：点击这里</a>'
     BAIDU_ANALYTICS = ""
     SCHOOL_LAN_PROXIES = ""
     PASSWORD_SECRET_KEY = "HardToGuessKeys."
@@ -67,9 +68,7 @@ class WechatConfig(Config):
     #  绑定认证URL
     AUTH_JW_TEXT = '\n<a href = "%s">【未绑定？点击这里绑定学号】</</a>\n'
     AUTH_LIBRARY_TEXT = '\n<a href = "%s">【未来绑定？点击这里绑定图书馆帐号】</</a>\n'
-    #  AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n\n<a href="%s">绑定图书馆帐号</a>\n'
     AUTH_TEXT = '\n<a href="%s">教务系统绑定：点击这里</a>\n'
-
     JW_LOGIN_URL = "http://bkjw2.guet.edu.cn/student/public/login.asp"
     JW_SCORE_URL = "http://bkjw2.guet.edu.cn/student/Score.asp"
     JW_INFO_URL = 'http://bkjw2.guet.edu.cn/student/Info.asp'

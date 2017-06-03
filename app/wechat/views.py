@@ -196,7 +196,7 @@ def user():
     """ 用户列表 """
     users = WechatUser.query.all()
     groups = Group.query.order_by(Group.id)[::-1] # 所有标签返回的是一个元组
-    #  该分组下用户数为0, 删除这个分组
+    #  FIXME 该分组下用户数为0, 删除这个分组
     for c in groups:
         p = c.wechatusers.all()
         if len(p) == 0:

@@ -78,8 +78,9 @@ def response_text():
         u'^绑定': auth_url,
         u'^天气': get_weather,
         u'^新闻': get_school_news,
-        u'^更新菜单': update_menu_setting,
+        u'^游戏': html5_games,
         u'^收到' : confirmed,
+        u'^更新菜单': update_menu_setting,
         u'\?|^？|^help|^帮助': all_command
             }
     #  匹配指令
@@ -238,6 +239,12 @@ def get_school_news():
     """ 学校新闻 """
     school_news.get(openid)
     return 'success'
+
+
+def html5_games():
+    """ html5游戏 """
+    content = app.config['HTML5_GAMES'] + app.config['HELP_TEXT']
+    return create_reply(content, msg).render()
 
 
 def get_weather():

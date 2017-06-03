@@ -1,0 +1,3 @@
+2017-06-02 23:43:44,753 WARNING: 豆瓣FM请求或解析失败: list index out of range[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/music.py:21]
+2017-06-03 09:11:49,925 WARNING: 从缓存获取 access_token 失败[in /media/kepler/Share/workspaces/wechat/app/wechat/utils.py:146]
+2017-06-03 09:11:54,810 WARNING: 豆瓣FM请求或解析失败: list index out of range[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/music.py:21]
