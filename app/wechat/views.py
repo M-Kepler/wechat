@@ -160,8 +160,7 @@ def setting(openid=None):
     if request.method == 'POST':
         #  只是保存了用户的设置的一个列表
         setting_list = request.form.getlist('setting')
-        user.user_setting = json.dumps(setting_list)
-        user.update()
+
         #  根据设置给用户分组
         for i in setting_list:
             group = Group.query.filter_by(name=i).first()
@@ -172,7 +171,17 @@ def setting(openid=None):
                     user.user_group.append(new_group)
                 else:
                     user.user_group.append(group)
-            user.save()
+            user.update()
+
+        #  用户去掉某个选择的时候, 就是比对数据库的user_setting和从网页传回来的setting_list
+        user_setting_list = json.loads(user.user_setting)
+        for i in user_setting_list:
+            if i not in setting_list:
+                delete_group = Group.query.filter_by(name=i).first()
+                user.user_group.remove(delete_group)
+        user.user_setting = json.dumps(setting_list)
+        user.update()
+
         #  TODO 显示一个Toast后, 关闭窗口
         return 'success'
     else:

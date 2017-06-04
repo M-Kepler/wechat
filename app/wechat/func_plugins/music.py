@@ -18,7 +18,6 @@ def get_douban_fm(openid):
         music_url = result["url"]
         title = result["title"]
     except Exception as e:
-        current_app.logger.warning(u"豆瓣FM请求或解析失败: %s" % e)
         context = u"网络繁忙，请稍候重试"
         wechat_custom.send_text(openid, context)
     else:

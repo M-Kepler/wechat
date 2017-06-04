@@ -1,3 +1,7 @@
 2017-06-02 23:43:44,753 WARNING: 豆瓣FM请求或解析失败: list index out of range[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/music.py:21]
 2017-06-03 09:11:49,925 WARNING: 从缓存获取 access_token 失败[in /media/kepler/Share/workspaces/wechat/app/wechat/utils.py:146]
 2017-06-03 09:11:54,810 WARNING: 豆瓣FM请求或解析失败: list index out of range[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/music.py:21]
+2017-06-04 11:09:50,420 WARNING: 客服推送失败: {'errcode': 40001, 'errmsg': 'invalid credential, access_token is invalid or not latest hint: [cwNX0790sz10!]'}
+推送内容：{'touser': 'oApGExFBMSuX7JogXTMYdj9SGlyg', 'msgtype': 'music', 'music': {'thumb_media_id': 'bad_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro', 'description': 'Backworld-建议WiFi下播放', 'title': "The Devil's Plaything", 'musicurl': 'http://mr3.doubanio.com/96d87cfad6d5f823ca7e225bf1517aed/0/fm/song/p1006_128k.mp4', 'hqmusicurl': 'http://mr3.doubanio.com/96d87cfad6d5f823ca7e225bf1517aed/0/fm/song/p1006_128k.mp4'}}[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/wechat_custom.py:78]
+2017-06-04 11:09:50,967 WARNING: 运行update_wechat_token结束[in /media/kepler/Share/workspaces/wechat/app/wechat/utils.py:137]
+2017-06-04 11:09:58,956 WARNING: 豆瓣FM请求或解析失败: list index out of range[in /media/kepler/Share/workspaces/wechat/app/wechat/func_plugins/music.py:21]
