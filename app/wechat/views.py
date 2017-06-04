@@ -339,6 +339,7 @@ def pushednews_detail(id):
     unconfirmed_id = pushednews.to_confirmed
     unconfirmed_name = []
     to_confirmed = json.loads(unconfirmed_id)
+    #  把目标用户的id全加入到未确认消息的分组下
     for user_id in to_confirmed:
         user = WechatUser.query.filter_by(id=user_id).first()
         if user.realname:
@@ -428,10 +429,20 @@ def pushedtext_detail(id):
 
 
 
-@wechat.route('/pushimage', methods=['GET', 'POST'])
-def pushimage():
-    """ 推送图片 """
+@wechat.route('/pushmetting', methods=['GET', 'POST'])
+def pushmetting():
+    """ 推送会议
+    保存会议的时间地点和会议内容到数据库，更新最新一条推送的信息，
+    并把内容发给用户, 其他的和普通推送应该差不多
+    """
     pass
+    redis.set("wechat:last_push_time", time.strftime('%Y-%m-%d %H:%M:%S'))
+    redis.hmset("wechat:last_push", {
+        "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
+        "to_confirmed" : to_user_id,
+        "media_id": media_id,
+        "pushtype":'metting'
+        })
 
 
 

@@ -56,16 +56,15 @@ class WechatUser(db.Model):
         db.session.commit()
         return self
 
-    #  FIXME  自动分组
     @staticmethod
     def on_created(target, value, oldvalue, initiator):
         group = Group.query.filter_by(name='全体用户').first()
         if group is None:
             new_group = Group()
             new_group.name = '全体用户'
-            #  user.user_group.append(new_group)
-        else:
-            target.user_group = Group.query.filter_by(name='全体用户').first()
+            new_group.save()
+        #  user.user_group.append(new_group)
+        target.user_group.append(Group.query.filter_by(name='全体用户').first())
 
 #  数据库on_created事件监听 #  每插入新对象就初始化用户的user_group
 db.event.listen(WechatUser.openid, 'set', WechatUser.on_created)
