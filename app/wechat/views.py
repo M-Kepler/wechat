@@ -174,16 +174,16 @@ def setting(openid=None):
             user.update()
 
         #  用户去掉某个选择的时候, 就是比对数据库的user_setting和从网页传回来的setting_list
-        user_setting_list = json.loads(user.user_setting)
-        for i in user_setting_list:
-            if i not in setting_list:
-                delete_group = Group.query.filter_by(name=i).first()
-                user.user_group.remove(delete_group)
+        if user.user_setting:
+            user_setting_list = json.loads(user.user_setting)
+            for i in user_setting_list:
+                if i not in setting_list:
+                    delete_group = Group.query.filter_by(name=i).first()
+                    user.user_group.remove(delete_group)
         user.user_setting = json.dumps(setting_list)
         user.update()
-
-        #  TODO 显示一个Toast后, 关闭窗口
-        return 'success'
+        #  XXX  显示一个Toast后, 关闭窗口
+        return render_template('wechat/setting_success.html')
     else:
         if user.user_setting:
             setting_list = json.loads(user.user_setting)
@@ -193,12 +193,12 @@ def setting(openid=None):
         return render_template('wechat/setting.html', values = setting_list)
 
 
-@wechat.route('/setting/result', methods=['GET'])
+@wechat.route('/setting/<openid>/result', methods=['GET'])
 def setting_result(openid=None):
     """ 查询学号绑定结果 """
     user = WechatUser.query.filter_by(openid=openid).first()
     if user.user_setting:
-        return jsonify({'errmsg' : ok})
+        return jsonify({'errmsg' : 'ok'})
     else:
         return jsonify({'errmsg' : '保存出错'})
 

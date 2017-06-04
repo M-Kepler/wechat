@@ -85,11 +85,6 @@ class WechatConfig(Config):
                 "name" : "引导",
                 "sub_button" : [
                     {
-                        "type" : "view",
-                        "name" : "桂电官网",
-                        "url" : "http://www.guet.edu.cn"
-                    },
-                    {
                         "type" : "click",
                         "name" : "使用帮助",
                         "key" : "help"
@@ -98,11 +93,6 @@ class WechatConfig(Config):
                         "type" : "click",
                         "name" : "绑定信息",
                         "key" : "auth"
-                    },
-                    {
-                        "type" : "click",
-                        "name" : "期末成绩",
-                        "key" : "score"
                     },
                     {
                         "type" : "click",
@@ -121,9 +111,14 @@ class WechatConfig(Config):
                         "key" : "school_news"
                     },
                     {
-                        "type":"view",
-                        "name":"视频",
-                        "url":'http://v.qq.com/'
+                        "type" : "view",
+                        "name" : "桂电官网",
+                        "url" : "http://www.guet.edu.cn"
+                    },
+                    {
+                        "type" : "click",
+                        "name" : "期末成绩",
+                        "key" : "score"
                     },
                     {
                         "type" : "view",
