@@ -41,7 +41,7 @@ class WechatConfig(Config):
     APPSECRET = '3436a11a7f5fd3d2c1225967e5aeb049'
     TOKEN = "kepler"
     REDIRECT_URI = 'http://huangjinjie.ngrok.cc/wechat/setting'
-    #  REDIRECT_URI = 'http://huangjinjie.ngrok.cc'
+    #  REDIRECT_URI = 'http://huangjinjie.me/wechat/setting'
 
     #  素材库图片ID
     MUSIC_THUMB_MEDIA_ID='bad_N1NZTEv_2maH7LQ6CJ8ZBCjrB6AAroHPzCIzGro'
@@ -56,6 +56,7 @@ class WechatConfig(Config):
 
     WELCOME_TEXT = "欢迎关注我的公众号.\n"
     HOST_URL = "http://huangjinjie.ngrok.cc/wechat"
+    #  HOST_URL = "http://huangjinjie.me/wechat"
 
     COMMAND_TEXT = "您可以回复以下关键字:\n---------------\n天气  新闻  歌曲\n游戏  测试5  测试6"
     COMMAND_NOT_FOUND = "\n后台已收到您的留言!"

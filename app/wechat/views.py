@@ -193,6 +193,16 @@ def setting(openid=None):
         return render_template('wechat/setting.html', values = setting_list)
 
 
+@wechat.route('/setting/result', methods=['GET'])
+def setting_result(openid=None):
+    """ 查询学号绑定结果 """
+    user = WechatUser.query.filter_by(openid=openid).first()
+    if user.user_setting:
+        return jsonify({'errmsg' : ok})
+    else:
+        return jsonify({'errmsg' : '保存出错'})
+
+
 @wechat.route('/phonenumber', methods=['GET'])
 def phone_number():
     """ 回复常用电话 """

@@ -1,0 +1,10 @@
+<uwsgi>
+    <pythonpath>/home/ubuntu/wechat/</pythonpath>
+    <module>run</module>
+    <callable>app</callable>
+    <socket>127.0.0.1:5000</socket>
+    <venv>/home/ubuntu/wxvenv/</venv>
+    <master/>
+    <processes>4</processes>
+    <memory-report/>
+</uwsgi>
