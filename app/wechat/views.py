@@ -20,6 +20,8 @@ from .utils import check_wechat_signature, get_jsapi_signature_data,\
         oauth_request, openid_list, init_wechat_sdk
 
 from functools import wraps
+
+
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
@@ -182,7 +184,6 @@ def setting(openid=None):
                     user.user_group.remove(delete_group)
         user.user_setting = json.dumps(setting_list)
         user.update()
-        #  XXX  显示一个Toast后, 关闭窗口
         return render_template('wechat/setting_success.html')
     else:
         if user.user_setting:
@@ -191,16 +192,6 @@ def setting(openid=None):
         else:
             setting_list = []
         return render_template('wechat/setting.html', values = setting_list)
-
-
-@wechat.route('/setting/<openid>/result', methods=['GET'])
-def setting_result(openid=None):
-    """ 查询学号绑定结果 """
-    user = WechatUser.query.filter_by(openid=openid).first()
-    if user.user_setting:
-        return jsonify({'errmsg' : 'ok'})
-    else:
-        return jsonify({'errmsg' : '保存出错'})
 
 
 @wechat.route('/phonenumber', methods=['GET'])
@@ -389,7 +380,7 @@ def pushtext():
         to_user_id.append(u.id)
     try:
         send_result = client.message.send_mass_text(to_user, content)
-        current_app.logger.warning(u'发送结果：%s' % send_result)
+        current_app.logger.warning(u'send result：%s' % send_result)
         media_id = send_result['msg_id']
         mass_status = client.message.get_mass(media_id)
 
@@ -445,24 +436,6 @@ def pushedtext_detail(id):
     """ 推送的文本通知的详情"""
     pushedtext = Pushtext.query.get(id)
     return render_template('wechat/pushedtext_detail.html', pushedtext=pushedtext)
-
-
-
-@wechat.route('/pushmetting', methods=['GET', 'POST'])
-def pushmetting():
-    """ 推送会议
-    保存会议的时间地点和会议内容到数据库，更新最新一条推送的信息，
-    并把内容发给用户, 其他的和普通推送应该差不多
-    """
-    pass
-    redis.set("wechat:last_push_time", time.strftime('%Y-%m-%d %H:%M:%S'))
-    redis.hmset("wechat:last_push", {
-        "create_time" : time.strftime('%Y-%m-%d %H:%M:%S'),
-        "to_confirmed" : to_user_id,
-        "media_id": media_id,
-        "pushtype":'metting'
-        })
-
 
 
 @wechat.route('/upload/',methods=['POST'])

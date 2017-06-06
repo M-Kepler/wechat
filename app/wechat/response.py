@@ -215,7 +215,7 @@ def developing():
 def confirmed():
     """ 确认通知已经收到 """
     try:
-        content=message_confirmed.confirmed(openid)
+        content = message_confirmed.confirmed(openid)
         reply = create_reply(content, msg)
         return reply.render()
     except Exception as e:
