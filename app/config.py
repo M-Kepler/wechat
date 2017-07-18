@@ -28,7 +28,8 @@ class DevelopmentConfig(Config):
     MAIL_USE_TLS=True
     MAIL_DEBUG = True
     ENABLE_THREADS=True
-    SAVEPIC='/home/kepler/wx_images/upload_mass_images'
+    #  SAVEPIC='/home/kepler/wx_images/upload_mass_images'
+    SAVEPIC='~/workspaces/wechat/wx_images/upload_mass_images'
 
 
 class TestingConfig(Config):
